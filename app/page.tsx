@@ -15,7 +15,6 @@ export default function HomePage() {
     );
     const createCalendar = useMutation(api.calendars.createCalendar);
     const [showCreate, setShowCreate] = useState(false);
-    const [title, setTitle] = useState("");
     const [displayName, setDisplayName] = useState("");
     const [inviteToken, setInviteToken] = useState<string | null>(null);
     const [creating, setCreating] = useState(false);
@@ -26,11 +25,9 @@ export default function HomePage() {
         setCreating(true);
         try {
             const result = await createCalendar({
-                title: title.trim() || undefined,
                 displayName: displayName.trim(),
             });
             setInviteToken(result.rawToken);
-            setTitle("");
             setDisplayName("");
         } catch (error) {
             console.error("Failed to create calendar:", error);
@@ -148,8 +145,6 @@ export default function HomePage() {
                                             />
                                         ) : (
                                             <CreateCalendarForm
-                                                title={title}
-                                                setTitle={setTitle}
                                                 displayName={displayName}
                                                 setDisplayName={setDisplayName}
                                                 creating={creating}
@@ -183,14 +178,14 @@ export default function HomePage() {
                                             hidden: { opacity: 0, y: 10 },
                                             visible: { opacity: 1, y: 0 },
                                         }}
-                                        className="h-full"
+                                        className="h-full relative group/card"
                                     >
                                         <Link href={`/calendar/${cal!._id}`} className="block h-full group">
                                             <div className="note-card h-full flex flex-col justify-between">
                                                 <div>
                                                     <div className="flex items-start justify-between mb-5">
                                                         <h3 className="font-display italic text-2xl text-[var(--color-text-primary)] group-hover:text-[var(--color-primary)] transition-colors leading-tight pr-4">
-                                                            {cal!.title || "Untitled Journal"}
+                                                            {cal!.title || "Shared Journal"}
                                                         </h3>
                                                         <span className="badge shrink-0 border-[var(--color-border)] text-[var(--color-text-secondary)]">
                                                             {cal!.participantCount}/2
@@ -233,6 +228,7 @@ export default function HomePage() {
                                                 </div>
                                             </div>
                                         </Link>
+
                                     </motion.div>
                                 ))}
                             </motion.div>
@@ -260,46 +256,67 @@ export default function HomePage() {
 function HeroSection() {
     return (
         <div className="py-12 sm:py-24">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="max-w-3xl"
-            >
-                <div className="mb-6 flex items-center gap-4">
-                    <div className="h-px bg-[var(--color-primary)] w-12" />
-                    <span className="text-[var(--color-primary)] text-sm font-semibold tracking-widest uppercase">
-                        The Shared Journal
-                    </span>
-                </div>
+            <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-center lg:items-start mb-20 lg:mb-32">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    className="max-w-2xl lg:max-w-3xl flex-1 text-center lg:text-left"
+                >
+                    <div className="mb-6 flex items-center justify-center lg:justify-start gap-4">
+                        <div className="h-px bg-[var(--color-primary)] w-12" />
+                        <span className="text-[var(--color-primary)] text-sm font-semibold tracking-widest uppercase">
+                            The Shared Journal
+                        </span>
+                        <div className="h-px bg-[var(--color-primary)] w-12 lg:hidden" />
+                    </div>
 
-                <h1 className="font-display text-6xl sm:text-7xl lg:text-8xl text-[var(--color-text-primary)] mb-8 leading-[1.05] tracking-tight">
-                    Every day is a <br />
-                    <span className="italic text-[var(--color-primary)]">new page.</span>
-                </h1>
+                    <h1 className="font-display text-5xl sm:text-7xl lg:text-8xl text-[var(--color-text-primary)] mb-8 leading-[1.05] tracking-tight">
+                        Every day is a <br className="hidden sm:block" />
+                        <span className="italic text-[var(--color-primary)]">new page.</span>
+                    </h1>
 
-                <p className="text-xl sm:text-2xl text-[var(--color-text-secondary)] max-w-2xl mb-12 leading-relaxed font-light">
-                    A private, shared calendar for two. Leave daily notes, memories, and moments together in a beautifully tactile space.
-                </p>
+                    <p className="text-lg sm:text-xl lg:text-2xl text-[var(--color-text-secondary)] max-w-2xl mb-12 leading-relaxed font-light mx-auto lg:mx-0">
+                        A private, shared calendar for two. Leave daily notes, memories, and moments together in a beautifully tactile space.
+                    </p>
 
-                <div className="flex flex-col sm:flex-row items-center gap-4">
-                    <SignInButton mode="modal">
-                        <button className="w-full sm:w-auto px-8 py-4 bg-[var(--color-text-primary)] text-[var(--color-surface)] font-medium hover:bg-black transition-colors cursor-pointer text-lg">
-                            Start Writing
-                        </button>
-                    </SignInButton>
-                    <span className="text-sm text-[var(--color-text-muted)] italic font-display">
-                        Always private. Designed for two.
-                    </span>
-                </div>
-            </motion.div>
+                    <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-5">
+                        <SignInButton mode="modal">
+                            <button className="w-full sm:w-auto px-8 py-4 bg-[var(--color-text-primary)] text-[var(--color-surface)] font-medium hover:bg-black transition-colors cursor-pointer text-lg">
+                                Start Writing
+                            </button>
+                        </SignInButton>
+                        <span className="text-sm text-[var(--color-text-muted)] italic font-display">
+                            Always private. Designed for two.
+                        </span>
+                    </div>
+                </motion.div>
 
-            {/* Editorial Image/Layout Graphic right next to it or below */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    className="w-full max-w-md lg:w-[450px] shrink-0 relative mt-10 lg:mt-0"
+                >
+                    {/* Shadow offset block */}
+                    {/* <div className="absolute inset-0 bg-[var(--color-primary)] translate-x-4 translate-y-4 -z-10 bg-opacity-90" /> */}
+                    {/* Image with white background so transparency pops nicely against it */}
+                    <div className=" p-2">
+                        <img
+                            src="/images/HeroImageSideIlusstration.webp"
+                            alt="A beautiful tactile journal illustration"
+                            className="w-full h-auto object-cover hover:opacity-90 transition-opacity backdrop-shadow-lg "
+                        />
+                    </div>
+                </motion.div>
+            </div>
+
+            {/* Editorial Features Grid */}
             <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                className="mt-20 border-t border-[var(--color-border)] pt-12 grid grid-cols-2 sm:grid-cols-4 gap-8"
+                transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                className="border-t border-[var(--color-border)] pt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
             >
                 <div>
                     <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-primary)] mb-2">01. Private</h4>
@@ -324,16 +341,12 @@ function HeroSection() {
 
 /* ─────────────── Create Calendar Form ─────────────── */
 function CreateCalendarForm({
-    title,
-    setTitle,
     displayName,
     setDisplayName,
     creating,
     onSubmit,
     onCancel,
 }: {
-    title: string;
-    setTitle: (v: string) => void;
     displayName: string;
     setDisplayName: (v: string) => void;
     creating: boolean;
@@ -349,18 +362,7 @@ function CreateCalendarForm({
                 <p className="text-sm text-[var(--color-text-secondary)] mt-1">Set the foundation for your written memories.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest text-[var(--color-text-primary)] mb-3">
-                        Title
-                    </label>
-                    <input
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="e.g. Our Letters"
-                        className="w-full px-0 py-3 bg-transparent border-b border-[var(--color-border)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)] transition-colors text-lg focus:outline-none"
-                    />
-                </div>
+            <div className="grid grid-cols-1 gap-8">
                 <div>
                     <label className="block text-xs font-bold uppercase tracking-widest text-[var(--color-text-primary)] mb-3">
                         Your Signature <span className="text-[var(--color-primary)]">*</span>
@@ -425,8 +427,8 @@ function InviteTokenResult({
                 <button
                     onClick={onCopy}
                     className={`w-full sm:w-auto px-6 py-3 text-sm font-medium transition-colors cursor-pointer whitespace-nowrap border ${copied
-                            ? "bg-[var(--color-surface)] text-[var(--color-text-primary)] border-[var(--color-border)]"
-                            : "bg-[var(--color-text-primary)] text-white border-[var(--color-text-primary)] hover:bg-black"
+                        ? "bg-[var(--color-surface)] text-[var(--color-text-primary)] border-[var(--color-border)]"
+                        : "bg-[var(--color-text-primary)] text-white border-[var(--color-text-primary)] hover:bg-black"
                         }`}
                 >
                     {copied ? "Copied" : "Copy Link"}

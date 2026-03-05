@@ -21,6 +21,9 @@ export const metadata: Metadata = {
     description:
         "A private two-person shared calendar where each day is an append-only note container. Leave daily notes, memories, and moments — together.",
     keywords: ["calendar", "shared", "notes", "daily", "couples", "journal"],
+    openGraph: {
+        images: ['/images/og.webp'],
+    },
 };
 
 export default function RootLayout({

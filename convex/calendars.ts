@@ -9,7 +9,6 @@ const SERVER_SALT = process.env.SERVER_SALT ?? "c-aleena-default-salt";
  */
 export const createCalendar = mutation({
   args: {
-    title: v.optional(v.string()),
     displayName: v.string(),
   },
   handler: async (ctx, args) => {
@@ -24,7 +23,7 @@ export const createCalendar = mutation({
 
     const calendarId = await ctx.db.insert("calendars", {
       ownerId: userId,
-      title: args.title || "Our Calendar",
+      title: "Shared Journal",
       inviteTokenHash: tokenHash,
       inviteExpiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
       maxParticipants: 2,
@@ -103,6 +102,7 @@ export const listMyCalendars = query({
         return {
           _id: calendar._id,
           title: calendar.title,
+          isOwner: calendar.ownerId === identity.subject,
           createdAt: calendar.createdAt,
           participantCount: allParticipants.length,
           participants: allParticipants.map((ap) => ({
@@ -114,6 +114,44 @@ export const listMyCalendars = query({
     );
 
     return calendars.filter(Boolean);
+  },
+});
+
+/**
+ * Delete a calendar (owner only).
+ */
+export const deleteCalendar = mutation({
+  args: { calendarId: v.id("calendars") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthenticated");
+
+    const calendar = await ctx.db.get(args.calendarId);
+    if (!calendar) throw new Error("Calendar not found");
+    if (calendar.ownerId !== identity.subject) throw new Error("Not authorized");
+
+    // Delete all notes
+    const notes = await ctx.db
+      .query("notes")
+      .withIndex("by_calendar", (q) => q.eq("calendarId", args.calendarId))
+      .collect();
+    for (const note of notes) {
+      await ctx.db.delete(note._id);
+    }
+
+    // Delete all participants
+    const participants = await ctx.db
+      .query("participants")
+      .withIndex("by_calendar", (q) => q.eq("calendarId", args.calendarId))
+      .collect();
+    for (const participant of participants) {
+      await ctx.db.delete(participant._id);
+    }
+
+    // Delete the calendar
+    await ctx.db.delete(args.calendarId);
+
+    return { success: true };
   },
 });
 
