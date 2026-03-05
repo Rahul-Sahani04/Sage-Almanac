@@ -63,10 +63,10 @@ export default function CalendarPage() {
 
     if (calendar === undefined) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
+            <div className="min-h-screen flex items-center justify-center bg-[var(--color-surface)]">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="w-10 h-10 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
-                    <p className="text-sm text-[var(--color-text-muted)]">Loading calendar...</p>
+                    <div className="w-8 h-8 border-[1.5px] border-[var(--color-text-secondary)] border-t-transparent rounded-full animate-spin" />
+                    <p className="text-sm font-medium tracking-widest uppercase text-[var(--color-text-secondary)]">Loading journal...</p>
                 </div>
             </div>
         );
@@ -74,31 +74,23 @@ export default function CalendarPage() {
 
     if (calendar === null) {
         return (
-            <div className="min-h-screen flex items-center justify-center px-4">
+            <div className="min-h-screen flex items-center justify-center px-4 bg-[var(--color-surface)]">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-center"
+                    className="text-center bg-white p-12 border border-[var(--color-border)] shadow-sm"
                 >
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[var(--color-surface-elevated)] flex items-center justify-center border border-[var(--color-border)]">
-                        <svg className="w-8 h-8 text-[var(--color-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <h2 className="font-display text-xl font-semibold text-[var(--color-text-primary)] mb-2">
-                        Calendar not found
+                    <h2 className="font-display italic text-3xl text-[var(--color-text-primary)] mb-4">
+                        Page Not Found
                     </h2>
-                    <p className="text-sm text-[var(--color-text-secondary)] mb-6">
-                        This calendar doesn&apos;t exist or you don&apos;t have access.
+                    <p className="text-base text-[var(--color-text-secondary)] mb-8">
+                        This journal doesn&apos;t exist or you don&apos;t have access.
                     </p>
                     <Link
                         href="/"
-                        className="inline-flex items-center gap-2 text-sm text-[var(--color-primary-light)] hover:text-[var(--color-primary)] transition-colors"
+                        className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-[var(--color-text-primary)] hover:opacity-70 transition-opacity border-b border-[var(--color-text-primary)] pb-1"
                     >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                        Back to Dashboard
+                        Back to library
                     </Link>
                 </motion.div>
             </div>
@@ -110,47 +102,43 @@ export default function CalendarPage() {
     const selectedIsPast = selectedDate ? isPast(selectedDate) : false;
 
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen bg-[var(--color-surface)] selection:bg-[var(--color-primary)] selection:text-white pb-20">
             {/* Header */}
-            <header className="border-b border-[var(--color-border)] glass sticky top-0 z-30">
-                <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4">
+            <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)]/90 backdrop-blur-md sticky top-0 z-30">
+                <div className="max-w-4xl mx-auto px-4 sm:px-8 py-5">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-4">
                             <Link
                                 href="/"
-                                className="w-9 h-9 rounded-xl flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-light)] transition-all"
+                                className="w-10 h-10 flex items-center justify-center text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors border border-transparent hover:border-[var(--color-border)] bg-transparent hover:bg-white"
                             >
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
                                 </svg>
                             </Link>
-                            <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center">
-                                    <svg className="w-4.5 h-4.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 bg-[var(--color-primary)] flex items-center justify-center border border-[var(--color-primary-dark)]">
+                                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                     </svg>
                                 </div>
                                 <div>
-                                    <h1 className="font-display font-semibold text-[var(--color-text-primary)] tracking-tight">
-                                        {calendar.title || "Untitled Calendar"}
+                                    <h1 className="font-display italic text-2xl font-medium text-[var(--color-text-primary)] tracking-tight leading-none">
+                                        {calendar.title || "Untitled Journal"}
                                     </h1>
-                                    <div className="flex items-center gap-3 mt-0.5">
+                                    <div className="flex items-center gap-3 mt-1.5">
                                         {participants?.map((p, i) => (
                                             <span
                                                 key={p._id}
-                                                className="inline-flex items-center gap-1 text-xs"
+                                                className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider"
                                                 style={{
-                                                    color: i === 0
-                                                        ? 'var(--color-participant-a)'
-                                                        : 'var(--color-participant-b)',
+                                                    color: i === 0 ? 'var(--color-participant-a)' : 'var(--color-participant-b)',
                                                 }}
                                             >
                                                 <span
                                                     className="w-1.5 h-1.5 rounded-full"
                                                     style={{
-                                                        background: i === 0
-                                                            ? 'var(--color-participant-a)'
-                                                            : 'var(--color-participant-b)',
+                                                        background: i === 0 ? 'var(--color-participant-a)' : 'var(--color-participant-b)',
                                                     }}
                                                 />
                                                 {p.displayName}
@@ -164,51 +152,57 @@ export default function CalendarPage() {
                 </div>
             </header>
 
-            <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6">
-                {/* Month navigation */}
-                <div className="flex items-center justify-between mb-6">
-                    <button
-                        onClick={prevMonth}
-                        className="w-10 h-10 rounded-xl flex items-center justify-center text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-light)] transition-all cursor-pointer"
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-
-                    <div className="text-center">
+            <main className="max-w-4xl mx-auto px-4 sm:px-8 mt-12 sm:mt-16">
+                {/* Journal Navigation layout */}
+                <div className="flex flex-col sm:flex-row items-center justify-between mb-10 gap-6">
+                    <div className="text-center sm:text-left flex-1">
+                        <span className="text-xs font-bold uppercase tracking-widest text-[var(--color-primary)] mb-2 block">
+                            Issue {year}
+                        </span>
                         <motion.h2
-                            key={`${year}-${month}`}
-                            initial={{ opacity: 0, y: 8 }}
+                            key={`title-${year}-${month}`}
+                            initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="font-display text-xl sm:text-2xl font-bold text-[var(--color-text-primary)] tracking-tight"
+                            className="font-display text-5xl sm:text-6xl text-[var(--color-text-primary)] tracking-tight leading-none"
                         >
-                            {getMonthName(month)} {year}
+                            {getMonthName(month)}
                         </motion.h2>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={prevMonth}
+                            className="w-12 h-12 flex items-center justify-center border border-[var(--color-border)] bg-white text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-text-primary)] transition-all cursor-pointer"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+
                         <button
                             onClick={goToToday}
-                            className="mt-1 px-3 py-0.5 rounded-full text-xs font-medium text-[var(--color-today)] bg-[var(--color-today)]/10 hover:bg-[var(--color-today)]/20 transition-colors cursor-pointer"
+                            className="px-6 h-12 flex items-center justify-center border border-[var(--color-border)] bg-white text-[var(--color-text-primary)] text-sm font-bold uppercase tracking-widest hover:border-[var(--color-text-primary)] transition-all cursor-pointer"
                         >
                             Today
                         </button>
-                    </div>
 
-                    <button
-                        onClick={nextMonth}
-                        className="w-10 h-10 rounded-xl flex items-center justify-center text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-light)] transition-all cursor-pointer"
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
+                        <button
+                            onClick={nextMonth}
+                            className="w-12 h-12 flex items-center justify-center border border-[var(--color-border)] bg-white text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-text-primary)] transition-all cursor-pointer"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 {/* Calendar Grid */}
                 <motion.div
-                    key={`${year}-${month}`}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.25, ease: "easeOut" }}
+                    key={`grid-${year}-${month}`}
+                    initial={{ opacity: 0, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, filter: "blur(0px)" }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
                 >
                     {monthData !== undefined ? (
                         <CalendarGrid
@@ -219,10 +213,10 @@ export default function CalendarPage() {
                             onDayClick={(date) => setSelectedDate(date)}
                         />
                     ) : (
-                        <div className="glass rounded-2xl p-5">
-                            <div className="grid grid-cols-7 gap-1.5">
+                        <div className="bg-white border border-[var(--color-border)] p-6 sm:p-10 shadow-sm">
+                            <div className="grid grid-cols-7 gap-px bg-[var(--color-border)]">
                                 {Array.from({ length: 35 }).map((_, i) => (
-                                    <div key={i} className="aspect-square skeleton rounded-xl" />
+                                    <div key={i} className="aspect-square bg-white opacity-50" />
                                 ))}
                             </div>
                         </div>
@@ -236,35 +230,32 @@ export default function CalendarPage() {
                 onClose={() => setSelectedDate(null)}
             >
                 {selectedDate && (
-                    <div>
-                        {/* Date header */}
-                        <div className="mb-5 pr-10">
-                            <div className="flex items-center gap-3">
+                    <div className="p-2">
+                        {/* Header for Day */}
+                        <div className="mb-8 border-b border-[var(--color-border)] pb-6">
+                            <div className="flex items-center justify-between">
                                 <div className="flex flex-col">
-                                    <span className="font-display text-3xl font-bold text-[var(--color-text-primary)] leading-none">
+                                    <span className="font-display italic text-6xl text-[var(--color-text-primary)] leading-none mb-2">
                                         {new Date(selectedDate + 'T12:00:00Z').getUTCDate()}
                                     </span>
-                                    <span className="text-xs text-[var(--color-text-secondary)] mt-0.5">
+                                    <span className="text-sm font-bold uppercase tracking-widest text-[var(--color-text-secondary)]">
                                         {new Date(selectedDate + 'T12:00:00Z').toLocaleDateString('en-US', {
-                                            weekday: 'short',
-                                            month: 'short',
+                                            weekday: 'long',
+                                            month: 'long',
+                                            year: 'numeric',
                                             timeZone: 'UTC',
                                         })}
                                     </span>
                                 </div>
-                                <div className="flex flex-col gap-1.5 ml-2">
+                                <div className="flex flex-col gap-2 items-end">
                                     {selectedIsToday && (
-                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--color-today)]/15 text-[var(--color-today)] text-xs font-semibold">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-today)] animate-pulse" />
-                                            Today
+                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[var(--color-primary)] text-white text-xs font-bold uppercase tracking-widest">
+                                            Present Day
                                         </span>
                                     )}
                                     {selectedIsPast && (
-                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--color-surface-light)] text-[var(--color-text-muted)] text-xs font-medium">
-                                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                            </svg>
-                                            Read-only
+                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 border border-[var(--color-border)] text-[var(--color-text-muted)] text-xs font-bold uppercase tracking-widest">
+                                            Archival
                                         </span>
                                     )}
                                 </div>
@@ -282,16 +273,18 @@ export default function CalendarPage() {
                                 }))}
                             />
                         ) : (
-                            <div className="space-y-3">
+                            <div className="space-y-6">
                                 {[1, 2].map((i) => (
-                                    <div key={i} className="skeleton h-20 rounded-xl" />
+                                    <div key={i} className="skeleton h-24 rounded-none opacity-50" />
                                 ))}
                             </div>
                         )}
 
                         {/* Input for today only */}
                         {selectedIsToday && (
-                            <NoteInput calendarId={calendarId} date={selectedDate} />
+                            <div className="mt-8 pt-6 border-t border-[var(--color-border)]">
+                                <NoteInput calendarId={calendarId} date={selectedDate} />
+                            </div>
                         )}
                     </div>
                 )}

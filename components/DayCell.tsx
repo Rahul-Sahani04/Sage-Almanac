@@ -28,77 +28,60 @@ export default function DayCell({
         <button
             onClick={onClick}
             className={`
-                aspect-square rounded-xl flex flex-col items-center justify-center gap-1
-                transition-all duration-200 cursor-pointer relative group overflow-hidden
+                w-full h-full aspect-[4/5] sm:aspect-square flex flex-col p-2 sm:p-3
+                transition-all duration-200 cursor-pointer relative group text-left
                 ${isToday
-                    ? "today-glow bg-[var(--color-today)]/10 border-2 border-[var(--color-today)]/50"
-                    : hasNotes && isPast
-                        ? "bg-[var(--color-primary)]/8 border border-[var(--color-border)] hover:bg-[var(--color-primary)]/15 hover:border-[var(--color-border-active)]"
-                        : hasNotes
-                            ? "bg-[var(--color-surface-elevated)]/60 border border-[var(--color-border-active)]/50 hover:bg-[var(--color-surface-elevated)]"
-                            : isPast
-                                ? "bg-[var(--color-surface-light)]/30 border border-transparent hover:bg-[var(--color-surface-light)]/50"
-                                : "bg-[var(--color-surface-light)]/50 border border-transparent hover:bg-[var(--color-surface-light)] hover:border-[var(--color-border)]"
+                    ? "bg-[var(--color-surface)]"
+                    : "bg-white hover:bg-[var(--color-surface)]"
                 }
             `}
         >
+            {/* Top corner for today indicator */}
+            {isToday && (
+                <div className="absolute top-0 right-0 w-8 h-8 pointer-events-none overflow-hidden">
+                    <div className="absolute top-[-16px] right-[-16px] w-8 h-8 bg-[var(--color-primary)] rotate-45" />
+                </div>
+            )}
+
             {/* Day number */}
             <span
-                className={`text-sm font-semibold transition-colors ${isToday
-                        ? "text-[var(--color-today)]"
+                className={`font-display text-xl sm:text-2xl mt-1 transition-colors ${isToday
+                        ? "text-[var(--color-primary)]"
                         : hasNotes && !isPast
                             ? "text-[var(--color-text-primary)]"
-                            : isPast
-                                ? "text-[var(--color-text-muted)]"
-                                : "text-[var(--color-text-secondary)] group-hover:text-[var(--color-text-primary)]"
+                            : isPast && !hasNotes
+                                ? "text-[var(--color-text-muted)] italic"
+                                : "text-[var(--color-text-primary)]"
                     }`}
             >
                 {day}
             </span>
 
-            {/* Note dot indicators — color-coded per participant */}
+            {/* Note dot indicators at bottom — color-coded per participant */}
             {hasNotes && (
-                <div className="flex items-center gap-[3px]">
+                <div className="mt-auto flex flex-wrap gap-1.5 pb-1">
                     {uniqueAuthors.length >= 1 && (
-                        <motion.span
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                            className="w-[6px] h-[6px] rounded-full"
+                        <div
+                            className="w-2.5 h-2.5 rounded-full"
                             style={{
-                                background: isToday
-                                    ? "var(--color-today)"
-                                    : "var(--color-participant-a)",
+                                background: "var(--color-participant-a)",
                             }}
                         />
                     )}
                     {uniqueAuthors.length >= 2 && (
-                        <motion.span
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ type: "spring", stiffness: 500, damping: 20, delay: 0.05 }}
-                            className="w-[6px] h-[6px] rounded-full"
+                        <div
+                            className="w-2.5 h-2.5 rounded-full"
                             style={{
-                                background: isToday
-                                    ? "var(--color-today)"
-                                    : "var(--color-participant-b)",
+                                background: "var(--color-participant-b)",
                             }}
                         />
                     )}
                     {noteCount > 2 && (
-                        <span className="text-[8px] text-[var(--color-text-muted)] ml-0.5 font-medium">
+                        <span className="text-[10px] font-bold text-[var(--color-text-secondary)] leading-none ml-0.5">
                             +{noteCount - uniqueAuthors.length}
                         </span>
                     )}
                 </div>
-            )}
-
-            {/* Hover glow overlay */}
-            <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-b from-[var(--color-primary)]/5 to-transparent pointer-events-none" />
-
-            {/* Today indicator ring animation */}
-            {isToday && (
-                <div className="absolute -inset-px rounded-xl border border-[var(--color-today)]/20 pointer-events-none" />
             )}
         </button>
     );

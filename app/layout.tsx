@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { DM_Sans, Newsreader } from "next/font/google";
 import ConvexClerkProvider from "@/lib/providers";
 import "./globals.css";
 
-const inter = Inter({
+const sans = DM_Sans({
     subsets: ["latin"],
-    variable: "--font-inter",
+    variable: "--font-sans",
+    display: "swap",
 });
 
-const outfit = Outfit({
+const display = Newsreader({
     subsets: ["latin"],
-    variable: "--font-outfit",
+    variable: "--font-display",
+    display: "swap",
+    style: ['normal', 'italic'],
 });
 
 export const metadata: Metadata = {
@@ -26,10 +29,8 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en" className={`${inter.variable} ${outfit.variable}`}>
+        <html lang="en" className={`${sans.variable} ${display.variable}`}>
             <body className="min-h-screen gradient-mesh">
-                {/* Ambient floating particles */}
-                <div className="particle-field" aria-hidden="true" />
                 <div className="relative z-10">
                     <ConvexClerkProvider>{children}</ConvexClerkProvider>
                 </div>

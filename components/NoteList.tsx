@@ -13,47 +13,31 @@ interface NoteListProps {
     notes: Note[];
 }
 
-// Simple hash to get consistent participant index
-function getParticipantIndex(name: string): number {
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-        hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return Math.abs(hash) % 2;
-}
-
 export default function NoteList({ notes }: NoteListProps) {
     if (notes.length === 0) {
         return (
-            <div className="text-center py-10">
-                <motion.div
-                    animate={{ y: [-3, 3, -3] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                    className="text-3xl mb-3"
-                >
-                    📝
-                </motion.div>
-                <p className="text-sm text-[var(--color-text-muted)]">
-                    No notes for this day yet.
+            <div className="text-center py-16 border-y border-[var(--color-border)] border-dashed my-8">
+                <p className="font-display italic text-xl text-[var(--color-text-secondary)]">
+                    No notes yet.
                 </p>
-                <p className="text-xs text-[var(--color-text-muted)]/60 mt-1">
-                    Be the first to write something!
+                <p className="text-sm font-bold uppercase tracking-widest text-[var(--color-text-muted)] mt-2">
+                    Begin the entry
                 </p>
             </div>
         );
     }
 
     return (
-        <div className="relative">
-            {/* Timeline spine */}
-            {notes.length > 1 && (
-                <div className="absolute left-[15px] top-4 bottom-4 w-[2px] rounded-full bg-gradient-to-b from-[var(--color-primary)]/30 via-[var(--color-border)] to-transparent" />
-            )}
-
-            <div className="space-y-3">
+        <div className="relative mt-6">
+            <div className="space-y-6">
                 <AnimatePresence mode="popLayout">
                     {notes.map((note, i) => {
-                        const pIndex = getParticipantIndex(note.authorName);
+                        // Quick naive hash to pick a consistent color per author
+                        let hash = 0;
+                        for (let j = 0; j < note.authorName.length; j++) {
+                            hash = note.authorName.charCodeAt(j) + ((hash << 5) - hash);
+                        }
+                        const pIndex = Math.abs(hash) % 2;
                         const accentColor = pIndex === 0
                             ? "var(--color-participant-a)"
                             : "var(--color-participant-b)";
@@ -61,52 +45,38 @@ export default function NoteList({ notes }: NoteListProps) {
                         return (
                             <motion.div
                                 key={note._id}
-                                initial={{ opacity: 0, x: -12 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 12 }}
-                                transition={{ delay: i * 0.06, type: "spring", stiffness: 300, damping: 25 }}
-                                className="flex gap-3"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ delay: i * 0.05, duration: 0.4 }}
+                                className="group relative"
                             >
-                                {/* Timeline dot */}
-                                <div className="flex-shrink-0 pt-4 relative z-10">
-                                    <motion.div
-                                        initial={{ scale: 0 }}
-                                        animate={{ scale: 1 }}
-                                        transition={{ type: "spring", stiffness: 500, damping: 20, delay: i * 0.06 + 0.1 }}
-                                        className="w-[10px] h-[10px] rounded-full border-2"
-                                        style={{
-                                            background: `${accentColor}20`,
-                                            borderColor: accentColor,
-                                        }}
-                                    />
-                                </div>
-
-                                {/* Note card with accent border */}
-                                <div
-                                    className="note-card flex-1 min-w-0"
-                                    style={{ '--accent-color': accentColor } as React.CSSProperties}
-                                >
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span
-                                            className="text-xs font-semibold px-2 py-0.5 rounded-md"
-                                            style={{
-                                                background: `${accentColor}15`,
-                                                color: accentColor,
-                                            }}
-                                        >
-                                            {note.authorName}
-                                        </span>
-                                        <span className="text-[10px] text-[var(--color-text-muted)] tabular-nums">
+                                {/* Note content with offset border style */}
+                                <div className="border border-[var(--color-border)] p-5 sm:p-6 bg-white relative z-10 transition-transform group-hover:-translate-y-1 duration-300">
+                                    <div className="flex items-baseline justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <span
+                                                className="w-2.5 h-2.5 rounded-none"
+                                                style={{ background: accentColor }}
+                                            />
+                                            <span className="text-sm font-bold uppercase tracking-widest text-[var(--color-text-primary)]">
+                                                {note.authorName}
+                                            </span>
+                                        </div>
+                                        <span className="text-xs font-medium text-[var(--color-text-muted)] bg-[var(--color-surface)] px-2 py-1">
                                             {new Date(note.createdAt).toLocaleTimeString("en-US", {
                                                 hour: "numeric",
                                                 minute: "2-digit",
+                                                hour12: true,
                                             })}
                                         </span>
                                     </div>
-                                    <p className="text-sm text-[var(--color-text-primary)] leading-relaxed whitespace-pre-wrap">
+                                    <p className="text-base text-[var(--color-text-primary)] leading-relaxed whitespace-pre-wrap font-sans">
                                         {note.content}
                                     </p>
                                 </div>
+                                {/* Drop shadow box underlying */}
+                                <div className="absolute inset-0 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] translate-x-1.5 translate-y-1.5 -z-10 transition-transform group-hover:translate-x-2 group-hover:translate-y-2 duration-300" />
                             </motion.div>
                         );
                     })}

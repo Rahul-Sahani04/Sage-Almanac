@@ -36,7 +36,7 @@ export default function CalendarGrid({
 }: CalendarGridProps) {
     const daysInMonth = getDaysInMonth(year, month);
     const firstDay = getFirstDayOfMonth(year, month);
-    const today = todayISO();
+    // const today = todayISO(); // Not strictly needed here if we use isToday from dates.ts
 
     // Build a map for quick lookup
     const dataMap = new Map<string, DayAggregate>();
@@ -70,40 +70,47 @@ export default function CalendarGrid({
         });
     }
 
+    // Add trailing empty cells to complete the grid (make it look like a full page)
+    const trailingDays = (7 - (cells.length % 7)) % 7;
+    for (let i = 0; i < trailingDays; i++) {
+        cells.push(null);
+    }
+
     return (
-        <div className="glass rounded-2xl p-3 sm:p-5">
+        <div className="bg-white border border-[var(--color-border)] p-4 sm:p-8 shadow-sm">
             {/* Weekday headers */}
-            <div className="grid grid-cols-7 gap-1.5 mb-3">
+            <div className="grid grid-cols-7 border-b border-[var(--color-border)] mb-4">
                 {WEEKDAYS.map((day) => (
                     <div
                         key={day}
-                        className="text-center text-xs font-semibold text-[var(--color-text-muted)] py-2 uppercase tracking-wider"
+                        className="text-center text-xs font-bold text-[var(--color-text-primary)] py-3 uppercase tracking-[0.2em]"
                     >
                         {day}
                     </div>
                 ))}
             </div>
 
-            {/* Day cells */}
+            {/* Day cells container - uses a thin 1px gap for a wireframe look */}
             <motion.div
-                className="grid grid-cols-7 gap-1.5"
+                className="grid grid-cols-7 gap-[1px] bg-[var(--color-border)] border border-[var(--color-border)] lg:gap-[1px]"
                 initial="hidden"
                 animate="visible"
                 variants={{
-                    visible: { transition: { staggerChildren: 0.02 } },
+                    visible: { transition: { staggerChildren: 0.015 } },
                 }}
             >
                 {cells.map((cell, i) =>
                     cell === null ? (
-                        <div key={`empty-${i}`} className="aspect-square" />
+                        <div key={`empty-${i}`} className="bg-[var(--color-surface-elevated)] aspect-[4/5] sm:aspect-square relative opacity-30" />
                     ) : (
                         <motion.div
                             key={cell.dateStr}
                             variants={{
-                                hidden: { opacity: 0, scale: 0.85 },
-                                visible: { opacity: 1, scale: 1 },
+                                hidden: { opacity: 0 },
+                                visible: { opacity: 1 },
                             }}
-                            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                            transition={{ duration: 0.3 }}
+                            className="bg-white h-full"
                         >
                             <DayCell
                                 day={cell.day}
