@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { motion, AnimatePresence } from "framer-motion";
+import { createPortal } from "react-dom";
 
 interface NoteInputProps {
     calendarId: Id<"calendars">;
@@ -17,6 +18,11 @@ export default function NoteInput({ calendarId, date }: NoteInputProps) {
     const [submitting, setSubmitting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const maxLen = 2000;
     const charPercent = Math.min((content.length / maxLen) * 100, 100);
@@ -83,19 +89,26 @@ export default function NoteInput({ calendarId, date }: NoteInputProps) {
                 </div>
             </div>
 
-            {/* Success micro-interaction */}
-            <AnimatePresence>
-                {showSuccess && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute top-0 right-0 mt-4 mr-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--color-success)]"
-                    >
-                        Saved to Archive
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            {/* Success micro-interaction (Global Toast) */}
+            {mounted && createPortal(
+                <div className="fixed top-6 right-6 z-[100] pointer-events-none">
+                    <AnimatePresence>
+                        {showSuccess && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                className="bg-white border border-[var(--color-border)] shadow-xl px-6 py-4 flex items-center gap-3 text-sm font-bold uppercase tracking-widest text-[var(--color-text-primary)] pointer-events-auto"
+                            >
+                                <div className="w-2 h-2 bg-[var(--color-success)]" />
+                                Entry Archived
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>,
+                document.body
+            )}
 
             {/* Error display */}
             <AnimatePresence>
@@ -104,7 +117,7 @@ export default function NoteInput({ calendarId, date }: NoteInputProps) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="mt-4 text-xs font-bold uppercase tracking-widest text-[var(--color-error)] border border-[var(--color-error)] p-3"
+                        className="mt-4 text-xs font-bold uppercase tracking-widest text-[var(--color-error)] border border-[var(--color-error)] p-3 bg-white"
                     >
                         {error}
                     </motion.div>
