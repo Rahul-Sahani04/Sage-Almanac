@@ -34,17 +34,17 @@ export default function DayModal({ isOpen, onClose, children }: DayModalProps) {
                             stiffness: 300,
                             damping: 30,
                         }}
-                        className="fixed inset-x-4 top-[10%] sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:w-full sm:max-w-xl z-50 max-h-[80vh] flex flex-col"
+                        className="fixed inset-x-4 top-[8%] sm:inset-x-auto sm:top-[10%] sm:left-1/2 sm:-translate-x-1/2 sm:w-full sm:max-w-xl z-50 flex flex-col"
                     >
-                        <div className="bg-white border border-[var(--color-border)] shadow-2xl relative flex flex-col max-h-full">
+                        <div className="bg-white border border-[var(--color-border)] shadow-2xl relative flex flex-col max-h-[85vh] sm:max-h-[80vh] overflow-hidden">
                             {/* Decorative top border */}
                             <div className="absolute top-0 left-0 right-0 h-1 bg-[var(--color-primary)]" />
 
-                            <div className="p-6 sm:p-8 flex items-start justify-end shrink-0 pt-8 pb-0">
+                            <div className="p-6 sm:p-8 flex items-start justify-end shrink-0 pt-8 pb-0 z-10 bg-white">
                                 {/* Close button */}
                                 <button
                                     onClick={onClose}
-                                    className="w-10 h-10 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors cursor-pointer z-10 hover:rotate-90 duration-300"
+                                    className="w-10 h-10 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors cursor-pointer hover:rotate-90 duration-300"
                                     aria-label="Close"
                                 >
                                     <svg
@@ -63,7 +63,7 @@ export default function DayModal({ isOpen, onClose, children }: DayModalProps) {
                                 </button>
                             </div>
 
-                            <div className="px-6 sm:px-10 pb-10 overflow-y-auto w-full custom-scrollbar">
+                            <div className="px-6 sm:px-10 pb-10 overflow-y-auto w-full custom-scrollbar flex-1 min-h-0 relative">
                                 {children}
                             </div>
                         </div>
