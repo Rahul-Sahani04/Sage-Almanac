@@ -60,7 +60,7 @@ export default function HomePage() {
             <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-md sticky top-0 z-30">
                 <div className="max-w-5xl mx-auto px-4 sm:px-8 py-5 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-3 group">
-                        <div className="w-9 h-9 bg-[var(--color-primary)] flex items-center justify-center text-white font-display italic text-xl shadow-sm transition-transform group-hover:scale-105">
+                        <div className="w-12 h-12 bg-[var(--color-primary)] flex items-center justify-center text-white font-display italic font-bold text-xl shadow-sm transition-transform group-hover:scale-105">
                             C
                         </div>
                         <div>
@@ -70,7 +70,7 @@ export default function HomePage() {
                         </div>
                     </Link>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 scale-125">
                         {!isSignedIn ? (
                             <SignInButton mode="modal">
                                 <button className="px-5 py-2.5 bg-[var(--color-primary)] text-white font-medium text-sm hover:bg-[var(--color-primary-dark)] transition-colors shadow-sm cursor-pointer border border-transparent">
