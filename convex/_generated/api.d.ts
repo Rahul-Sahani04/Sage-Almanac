@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as authUtils from "../authUtils.js";
 import type * as calendars from "../calendars.js";
 import type * as debug from "../debug.js";
 import type * as notes from "../notes.js";
@@ -21,6 +22,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  authUtils: typeof authUtils;
   calendars: typeof calendars;
   debug: typeof debug;
   notes: typeof notes;

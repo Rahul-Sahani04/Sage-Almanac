@@ -4,21 +4,30 @@ import { useParams, useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { SignInButton, useAuth } from "@clerk/nextjs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useAnonymousId } from "@/hooks/useAnonymousId";
 
 export default function JoinPage() {
     const params = useParams();
     const router = useRouter();
     const token = params.token as string;
-    const { isSignedIn, isLoaded } = useAuth();
+    const { isLoaded: clerkLoaded } = useAuth();
+    const { anonymousId, isLoaded: anonLoaded } = useAnonymousId();
     const joinCalendar = useMutation(api.participants.joinCalendar);
 
     const [displayName, setDisplayName] = useState("");
+    const [password, setPassword] = useState("");
+    const [requiresPassword, setRequiresPassword] = useState(false);
     const [joining, setJoining] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
+
+    useEffect(() => {
+        const savedName = localStorage.getItem("cAleena_displayName");
+        if (savedName) setDisplayName(savedName);
+    }, []);
 
     const handleJoin = async () => {
         if (!displayName.trim()) return;
@@ -26,10 +35,26 @@ export default function JoinPage() {
         setError(null);
 
         try {
-            const result = await joinCalendar({
+            const args: any = {
                 rawToken: token,
                 displayName: displayName.trim(),
-            });
+                anonymousId,
+            };
+
+            if (requiresPassword && password) {
+                args.password = password;
+            }
+
+            const result = await joinCalendar(args);
+
+            if (result.passwordRequired) {
+                setRequiresPassword(true);
+                setError(password ? "Incorrect password" : "This journal requires a password.");
+                setJoining(false);
+                return;
+            }
+
+            localStorage.setItem("cAleena_displayName", displayName.trim());
 
             if (result.alreadyJoined) {
                 setSuccess("You've already joined this calendar!");
@@ -48,7 +73,7 @@ export default function JoinPage() {
         setJoining(false);
     };
 
-    if (!isLoaded) {
+    if (!clerkLoaded || !anonLoaded) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
@@ -102,21 +127,10 @@ export default function JoinPage() {
                             You&apos;re Invited! 💌
                         </h1>
                         <p className="text-sm text-[var(--color-text-secondary)] mb-8 leading-relaxed">
-                            Someone special invited you to share a daily calendar together.
+                            Someone special invited you to share a daily calendar together. No account required.
                         </p>
 
-                        {!isSignedIn ? (
-                            <div className="space-y-4">
-                                <p className="text-sm text-[var(--color-text-secondary)]">
-                                    Sign in first to join this calendar.
-                                </p>
-                                <SignInButton mode="modal">
-                                    <button className="w-full py-3 rounded-xl gradient-primary text-white font-medium text-sm hover:opacity-90 transition-all shadow-md shadow-[var(--color-primary)]/20 cursor-pointer">
-                                        Sign In to Continue
-                                    </button>
-                                </SignInButton>
-                            </div>
-                        ) : success ? (
+                        {success ? (
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
@@ -164,13 +178,46 @@ export default function JoinPage() {
                                             value={displayName}
                                             onChange={(e) => setDisplayName(e.target.value)}
                                             placeholder="Enter your name"
+                                            maxLength={20}
                                             className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--color-surface-light)] border border-[var(--color-border)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-active)] transition-all text-sm glow-ring"
                                             onKeyDown={(e) => {
-                                                if (e.key === "Enter") handleJoin();
+                                                if (e.key === "Enter" && !requiresPassword) handleJoin();
                                             }}
                                         />
                                     </div>
                                 </div>
+
+                                {requiresPassword && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        className="text-left overflow-hidden"
+                                    >
+                                        <label className="block text-sm text-[var(--color-text-secondary)] mb-2 font-medium mt-1">
+                                            Journal Password
+                                        </label>
+                                        <div className="relative">
+                                            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]">
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                </svg>
+                                            </div>
+                                            <input
+                                                type="password"
+                                                value={password}
+                                                onChange={(e) => {
+                                                    setPassword(e.target.value);
+                                                    setError(null);
+                                                }}
+                                                placeholder="Enter journal password"
+                                                className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--color-surface-light)] border border-[var(--color-border)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-active)] transition-all text-sm glow-ring"
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter") handleJoin();
+                                                }}
+                                            />
+                                        </div>
+                                    </motion.div>
+                                )}
 
                                 {error && (
                                     <motion.div
@@ -184,7 +231,7 @@ export default function JoinPage() {
 
                                 <button
                                     onClick={handleJoin}
-                                    disabled={!displayName.trim() || joining}
+                                    disabled={!displayName.trim() || (requiresPassword && !password) || joining}
                                     className="w-full py-3 rounded-xl gradient-warm text-white font-medium text-sm hover:opacity-90 transition-all disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed shadow-md shadow-[var(--color-rose)]/20 flex items-center justify-center gap-2"
                                 >
                                     {joining ? (

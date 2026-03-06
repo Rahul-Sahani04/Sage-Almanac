@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { todayISO } from "./utils";
+import { resolveUser } from "./authUtils";
 
 /**
  * Add a note to a calendar for a specific day.
@@ -11,10 +12,11 @@ export const addNote = mutation({
     calendarId: v.id("calendars"),
     content: v.string(),
     date: v.string(), // YYYY-MM-DD
+    anonymousId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Unauthenticated");
+    const userId = await resolveUser(ctx, args.anonymousId);
+    if (!userId) throw new Error("Unauthenticated");
 
     // Validate content
     const content = args.content.trim();
@@ -25,7 +27,7 @@ export const addNote = mutation({
     const participant = await ctx.db
       .query("participants")
       .withIndex("by_calendar_user", (q) =>
-        q.eq("calendarId", args.calendarId).eq("userId", identity.subject)
+        q.eq("calendarId", args.calendarId).eq("userId", userId)
       )
       .first();
 
@@ -72,16 +74,17 @@ export const getMonthView = query({
     calendarId: v.id("calendars"),
     year: v.number(),
     month: v.number(), // 1-12
+    anonymousId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return [];
+    const userId = await resolveUser(ctx, args.anonymousId);
+    if (!userId) return [];
 
     // Verify participant
     const participant = await ctx.db
       .query("participants")
       .withIndex("by_calendar_user", (q) =>
-        q.eq("calendarId", args.calendarId).eq("userId", identity.subject)
+        q.eq("calendarId", args.calendarId).eq("userId", userId)
       )
       .first();
 
@@ -121,16 +124,17 @@ export const getDayNotes = query({
   args: {
     calendarId: v.id("calendars"),
     date: v.string(), // YYYY-MM-DD
+    anonymousId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return [];
+    const userId = await resolveUser(ctx, args.anonymousId);
+    if (!userId) return [];
 
     // Verify participant
     const participant = await ctx.db
       .query("participants")
       .withIndex("by_calendar_user", (q) =>
-        q.eq("calendarId", args.calendarId).eq("userId", identity.subject)
+        q.eq("calendarId", args.calendarId).eq("userId", userId)
       )
       .first();
 

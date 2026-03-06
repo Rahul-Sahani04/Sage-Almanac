@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { generateToken, hashToken } from "./utils";
+import { resolveUser } from "./authUtils";
 
 const SERVER_SALT = process.env.SERVER_SALT ?? "c-aleena-default-salt";
 
@@ -10,22 +11,27 @@ const SERVER_SALT = process.env.SERVER_SALT ?? "c-aleena-default-salt";
 export const createCalendar = mutation({
   args: {
     displayName: v.string(),
+    anonymousId: v.optional(v.string()),
+    password: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    console.log("=== AUTH DEBUG ===");
-    console.log("Identity from ctx.auth:", identity);
-    if (!identity) throw new Error("Unauthenticated (no valid Clerk JWT matching Convex config found)");
+    const userId = await resolveUser(ctx, args.anonymousId);
+    if (!userId) throw new Error("Unauthenticated (no valid identity or anonymousId)");
 
-    const userId = identity.subject;
     const rawToken = generateToken(16);
     const tokenHash = await hashToken(rawToken, SERVER_SALT);
+
+    let passwordHash = undefined;
+    if (args.password) {
+      passwordHash = await hashToken(args.password, SERVER_SALT);
+    }
 
     const calendarId = await ctx.db.insert("calendars", {
       ownerId: userId,
       title: "Shared Journal",
       inviteTokenHash: tokenHash,
       inviteExpiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
+      passwordHash,
       maxParticipants: 2,
       createdAt: Date.now(),
     });
@@ -46,10 +52,10 @@ export const createCalendar = mutation({
  * Get calendar details (requires participant access).
  */
 export const getCalendar = query({
-  args: { calendarId: v.id("calendars") },
+  args: { calendarId: v.id("calendars"), anonymousId: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return null;
+    const userId = await resolveUser(ctx, args.anonymousId);
+    if (!userId) return null;
 
     const calendar = await ctx.db.get(args.calendarId);
     if (!calendar) return null;
@@ -58,7 +64,7 @@ export const getCalendar = query({
     const participant = await ctx.db
       .query("participants")
       .withIndex("by_calendar_user", (q) =>
-        q.eq("calendarId", args.calendarId).eq("userId", identity.subject)
+        q.eq("calendarId", args.calendarId).eq("userId", userId)
       )
       .first();
 
@@ -70,6 +76,7 @@ export const getCalendar = query({
       ownerId: calendar.ownerId,
       createdAt: calendar.createdAt,
       hasInviteToken: !!calendar.inviteTokenHash,
+      isPasswordProtected: !!calendar.passwordHash,
       maxParticipants: calendar.maxParticipants,
     };
   },
@@ -79,14 +86,14 @@ export const getCalendar = query({
  * List all calendars the current user participates in.
  */
 export const listMyCalendars = query({
-  args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return [];
+  args: { anonymousId: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const userId = await resolveUser(ctx, args.anonymousId);
+    if (!userId) return [];
 
     const participations = await ctx.db
       .query("participants")
-      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
+      .withIndex("by_user", (q) => q.eq("userId", userId))
       .collect();
 
     const calendars = await Promise.all(
@@ -102,7 +109,7 @@ export const listMyCalendars = query({
         return {
           _id: calendar._id,
           title: calendar.title,
-          isOwner: calendar.ownerId === identity.subject,
+          isOwner: calendar.ownerId === userId,
           createdAt: calendar.createdAt,
           participantCount: allParticipants.length,
           participants: allParticipants.map((ap) => ({
@@ -121,14 +128,14 @@ export const listMyCalendars = query({
  * Delete a calendar (owner only).
  */
 export const deleteCalendar = mutation({
-  args: { calendarId: v.id("calendars") },
+  args: { calendarId: v.id("calendars"), anonymousId: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Unauthenticated");
+    const userId = await resolveUser(ctx, args.anonymousId);
+    if (!userId) throw new Error("Unauthenticated");
 
     const calendar = await ctx.db.get(args.calendarId);
     if (!calendar) throw new Error("Calendar not found");
-    if (calendar.ownerId !== identity.subject) throw new Error("Not authorized");
+    if (calendar.ownerId !== userId) throw new Error("Not authorized");
 
     // Delete all notes
     const notes = await ctx.db
@@ -159,14 +166,14 @@ export const deleteCalendar = mutation({
  * Regenerate invite token (owner only).
  */
 export const regenerateInviteToken = mutation({
-  args: { calendarId: v.id("calendars") },
+  args: { calendarId: v.id("calendars"), anonymousId: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Unauthenticated");
+    const userId = await resolveUser(ctx, args.anonymousId);
+    if (!userId) throw new Error("Unauthenticated");
 
     const calendar = await ctx.db.get(args.calendarId);
     if (!calendar) throw new Error("Calendar not found");
-    if (calendar.ownerId !== identity.subject) throw new Error("Not the owner");
+    if (calendar.ownerId !== userId) throw new Error("Not the owner");
 
     // Check if calendar already has max participants
     const participants = await ctx.db

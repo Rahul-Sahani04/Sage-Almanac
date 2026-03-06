@@ -7,6 +7,7 @@ export default defineSchema({
     title: v.optional(v.string()),
     inviteTokenHash: v.optional(v.union(v.string(), v.null())),
     inviteExpiresAt: v.optional(v.union(v.number(), v.null())),
+    passwordHash: v.optional(v.string()),
     maxParticipants: v.number(),
     createdAt: v.number(),
   })

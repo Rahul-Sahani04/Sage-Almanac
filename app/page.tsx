@@ -6,16 +6,20 @@ import { api } from "@/convex/_generated/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import Link from "next/link";
+import { useAnonymousId } from "@/hooks/useAnonymousId";
 
 export default function HomePage() {
-    const { isSignedIn, isLoaded } = useAuth();
+    const { isSignedIn, isLoaded: clerkLoaded } = useAuth();
+    const { anonymousId, isLoaded: anonLoaded } = useAnonymousId();
     const calendars = useQuery(
         api.calendars.listMyCalendars,
-        isSignedIn ? {} : "skip"
+        (clerkLoaded && anonLoaded) ? { anonymousId } : "skip"
     );
     const createCalendar = useMutation(api.calendars.createCalendar);
     const [showCreate, setShowCreate] = useState(false);
     const [displayName, setDisplayName] = useState("");
+    const [password, setPassword] = useState("");
+    const [usePassword, setUsePassword] = useState(false);
     const [inviteToken, setInviteToken] = useState<string | null>(null);
     const [creating, setCreating] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -24,9 +28,11 @@ export default function HomePage() {
         if (!displayName.trim()) return;
         setCreating(true);
         try {
-            const result = await createCalendar({
-                displayName: displayName.trim(),
-            });
+            const args: any = { displayName: displayName.trim(), anonymousId };
+            if (usePassword && password) {
+                args.password = password;
+            }
+            const result = await createCalendar(args);
             setInviteToken(result.rawToken);
             setDisplayName("");
         } catch (error) {
@@ -43,7 +49,7 @@ export default function HomePage() {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    if (!isLoaded) {
+    if (!clerkLoaded || !anonLoaded) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[var(--color-surface)]">
                 <div className="flex flex-col items-center gap-4">
@@ -91,7 +97,7 @@ export default function HomePage() {
             </header>
 
             <main className="max-w-5xl mx-auto px-4 sm:px-8 py-10 sm:py-16">
-                {!isSignedIn ? (
+                {(!isSignedIn && (!calendars || calendars.length === 0)) ? (
                     <HeroSection />
                 ) : (
                     <>
@@ -147,6 +153,10 @@ export default function HomePage() {
                                             <CreateCalendarForm
                                                 displayName={displayName}
                                                 setDisplayName={setDisplayName}
+                                                usePassword={usePassword}
+                                                setUsePassword={setUsePassword}
+                                                password={password}
+                                                setPassword={setPassword}
                                                 creating={creating}
                                                 onSubmit={handleCreate}
                                                 onCancel={() => setShowCreate(false)}
@@ -343,12 +353,20 @@ function HeroSection() {
 function CreateCalendarForm({
     displayName,
     setDisplayName,
+    usePassword,
+    setUsePassword,
+    password,
+    setPassword,
     creating,
     onSubmit,
     onCancel,
 }: {
     displayName: string;
     setDisplayName: (v: string) => void;
+    usePassword?: boolean;
+    setUsePassword?: (v: boolean) => void;
+    password?: string;
+    setPassword?: (v: string) => void;
     creating: boolean;
     onSubmit: () => void;
     onCancel: () => void;
@@ -374,6 +392,43 @@ function CreateCalendarForm({
                         className="w-full px-0 py-3 bg-transparent border-b border-[var(--color-border)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)] transition-colors text-lg focus:outline-none font-display italic"
                     />
                 </div>
+
+                {setUsePassword && (
+                    <div>
+                        <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--color-text-primary)] mb-3 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={usePassword}
+                                onChange={(e) => {
+                                    setUsePassword(e.target.checked);
+                                    if (!e.target.checked && setPassword) setPassword("");
+                                }}
+                                className="w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-primary)] focus:ring-[var(--color-primary-light)]"
+                            />
+                            Password Protect Link (Optional)
+                        </label>
+
+                        <AnimatePresence>
+                            {usePassword && setPassword && (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                                    animate={{ opacity: 1, height: 'auto', marginTop: 12 }}
+                                    exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                                    className="relative overflow-hidden"
+                                >
+                                    <input
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        placeholder="Set a password"
+                                        maxLength={50}
+                                        className="w-full px-0 py-3 bg-transparent border-b border-[var(--color-border)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)] transition-colors text-lg focus:outline-none font-sans"
+                                    />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                )}
             </div>
 
             <div className="flex justify-end gap-4 pt-6">

@@ -8,6 +8,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useAnonymousId } from "@/hooks/useAnonymousId";
 import CalendarGrid from "@/components/CalendarGrid";
 import DayModal from "@/components/DayModal";
 import NoteList from "@/components/NoteList";
@@ -17,7 +18,8 @@ import { getMonthName, todayISO, isToday, isPast, formatDateDisplay } from "@/li
 export default function CalendarPage() {
     const params = useParams();
     const router = useRouter();
-    const { userId } = useAuth();
+    const { userId, isLoaded: clerkLoaded } = useAuth();
+    const { anonymousId, isLoaded: anonLoaded } = useAnonymousId();
     const calendarId = params.id as Id<"calendars">;
 
     const now = new Date();
@@ -28,19 +30,30 @@ export default function CalendarPage() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const calendar = useQuery(api.calendars.getCalendar, { calendarId });
+    // Sharing state
+    const [showShareModal, setShowShareModal] = useState(false);
+    const [shareToken, setShareToken] = useState<string | null>(null);
+    const [isSharing, setIsSharing] = useState(false);
+    const [copied, setCopied] = useState(false);
+
+    const isFullyLoaded = clerkLoaded && anonLoaded;
+
+    const calendar = useQuery(api.calendars.getCalendar, isFullyLoaded ? { calendarId, anonymousId } : "skip");
     const deleteCalendar = useMutation(api.calendars.deleteCalendar);
-    const participants = useQuery(api.participants.getParticipants, {
+    const regenerateToken = useMutation(api.calendars.regenerateInviteToken);
+    const participants = useQuery(api.participants.getParticipants, isFullyLoaded ? {
         calendarId,
-    });
-    const monthData = useQuery(api.notes.getMonthView, {
+        anonymousId
+    } : "skip");
+    const monthData = useQuery(api.notes.getMonthView, isFullyLoaded ? {
         calendarId,
         year,
         month,
-    });
+        anonymousId
+    } : "skip");
     const dayNotes = useQuery(
         api.notes.getDayNotes,
-        selectedDate ? { calendarId, date: selectedDate } : "skip"
+        (isFullyLoaded && selectedDate) ? { calendarId, date: selectedDate, anonymousId } : "skip"
     );
 
     const prevMonth = () => {
@@ -70,7 +83,7 @@ export default function CalendarPage() {
     const handleDelete = async () => {
         setIsDeleting(true);
         try {
-            await deleteCalendar({ calendarId });
+            await deleteCalendar({ calendarId, anonymousId });
             router.push('/');
         } catch (error) {
             console.error("Failed to delete journal:", error);
@@ -79,7 +92,26 @@ export default function CalendarPage() {
         }
     };
 
-    if (calendar === undefined) {
+    const handleShare = async () => {
+        setIsSharing(true);
+        try {
+            const res = await regenerateToken({ calendarId, anonymousId });
+            setShareToken(res.rawToken);
+        } catch (error) {
+            console.error("Failed to regenerate token:", error);
+        }
+        setIsSharing(false);
+    };
+
+    const copyToken = async () => {
+        if (!shareToken) return;
+        const url = `${window.location.origin}/join/${shareToken}`;
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    if (!isFullyLoaded || calendar === undefined) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[var(--color-surface)]">
                 <div className="flex flex-col items-center gap-4">
@@ -166,16 +198,30 @@ export default function CalendarPage() {
                                 </div>
                             </div>
                         </div>
-                        {calendar.ownerId === userId && (
-                            <button
-                                onClick={() => setShowDeleteModal(true)}
-                                className="w-10 h-10 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-error)] transition-colors border border-transparent hover:border-[var(--color-error)] hover:bg-[var(--color-error)]/5 cursor-pointer"
-                                aria-label="Delete Journal"
-                            >
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                            </button>
+                        {(calendar.ownerId === userId || (anonymousId && calendar.ownerId === anonymousId)) && (
+                            <div className="flex items-center">
+                                <button
+                                    onClick={() => {
+                                        setShowShareModal(true);
+                                        if (!shareToken) handleShare();
+                                    }}
+                                    className="w-10 h-10 flex items-center justify-center text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors border border-transparent hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 cursor-pointer"
+                                    aria-label="Share Journal"
+                                >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                    </svg>
+                                </button>
+                                <button
+                                    onClick={() => setShowDeleteModal(true)}
+                                    className="w-10 h-10 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-error)] transition-colors border border-transparent hover:border-[var(--color-error)] hover:bg-[var(--color-error)]/5 cursor-pointer"
+                                    aria-label="Delete Journal"
+                                >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -374,6 +420,80 @@ export default function CalendarPage() {
                                         "Yes, delete it"
                                     )}
                                 </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Share Modal */}
+            <AnimatePresence>
+                {showShareModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowShareModal(false)}
+                            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-md bg-white border border-[var(--color-border)] shadow-2xl p-8"
+                        >
+                            {/* Decorative element */}
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-2 bg-white/50 border border-[var(--color-border)] shadow-sm rotate-1" />
+
+                            <button
+                                onClick={() => setShowShareModal(false)}
+                                className="absolute top-4 right-4 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] cursor-pointer"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+
+                            <div className="text-center py-4">
+                                <h3 className="font-display italic text-3xl text-[var(--color-text-primary)] mb-4">
+                                    Share Journal
+                                </h3>
+                                <p className="text-sm text-[var(--color-text-secondary)] mb-8 max-w-md mx-auto">
+                                    {isSharing
+                                        ? "Generating secure link..."
+                                        : "Share this link with your partner. It overrides any previous links."}
+                                </p>
+
+                                {isSharing ? (
+                                    <div className="flex justify-center p-6">
+                                        <div className="loader w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
+                                    </div>
+                                ) : shareToken ? (
+                                    <div className="space-y-6">
+                                        <div className="flex flex-col gap-3">
+                                            <div className="w-full px-4 py-3 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm font-mono truncate select-all text-left">
+                                                {`${typeof window !== "undefined" ? window.location.origin : ""}/join/${shareToken}`}
+                                            </div>
+                                            <button
+                                                onClick={copyToken}
+                                                className={`w-full px-6 py-3 text-sm font-medium transition-colors cursor-pointer border ${copied
+                                                    ? "bg-[var(--color-surface)] text-[var(--color-text-primary)] border-[var(--color-border)]"
+                                                    : "bg-[var(--color-text-primary)] text-white border-[var(--color-text-primary)] hover:bg-black"
+                                                    }`}
+                                            >
+                                                {copied ? "Copied!" : "Copy Link"}
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={handleShare}
+                                        className="px-6 py-3 bg-[var(--color-text-primary)] text-white text-sm font-medium transition-colors cursor-pointer hover:bg-black w-full"
+                                    >
+                                        Generate Invite Link
+                                    </button>
+                                )}
                             </div>
                         </motion.div>
                     </div>

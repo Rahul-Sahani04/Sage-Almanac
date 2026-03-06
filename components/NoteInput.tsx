@@ -6,6 +6,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
+import { useAnonymousId } from "@/hooks/useAnonymousId";
 
 interface NoteInputProps {
     calendarId: Id<"calendars">;
@@ -14,6 +15,7 @@ interface NoteInputProps {
 
 export default function NoteInput({ calendarId, date }: NoteInputProps) {
     const addNote = useMutation(api.notes.addNote);
+    const { anonymousId } = useAnonymousId();
     const [content, setContent] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -33,7 +35,7 @@ export default function NoteInput({ calendarId, date }: NoteInputProps) {
         setError(null);
 
         try {
-            await addNote({ calendarId, content: content.trim(), date });
+            await addNote({ calendarId, content: content.trim(), date, anonymousId });
             setContent("");
             setShowSuccess(true);
             setTimeout(() => setShowSuccess(false), 2000);
