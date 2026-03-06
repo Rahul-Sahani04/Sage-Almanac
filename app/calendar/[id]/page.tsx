@@ -467,23 +467,37 @@ export default function CalendarPage() {
 
                                 {isSharing ? (
                                     <div className="flex justify-center p-6">
-                                        <div className="loader w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
+                                        <div className="w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
                                     </div>
                                 ) : shareToken ? (
                                     <div className="space-y-6">
                                         <div className="flex flex-col gap-3">
-                                            <div className="w-full px-4 py-3 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm font-mono truncate select-all text-left">
-                                                {`${typeof window !== "undefined" ? window.location.origin : ""}/join/${shareToken}`}
+                                            <div className="relative group">
+                                                <div className="w-full px-4 py-3 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm font-mono truncate select-all text-left">
+                                                    {`${typeof window !== "undefined" ? window.location.origin : ""}/join/${shareToken}`}
+                                                </div>
                                             </div>
-                                            <button
-                                                onClick={copyToken}
-                                                className={`w-full px-6 py-3 text-sm font-medium transition-colors cursor-pointer border ${copied
-                                                    ? "bg-[var(--color-surface)] text-[var(--color-text-primary)] border-[var(--color-border)]"
-                                                    : "bg-[var(--color-text-primary)] text-white border-[var(--color-text-primary)] hover:bg-black"
-                                                    }`}
-                                            >
-                                                {copied ? "Copied!" : "Copy Link"}
-                                            </button>
+                                            <div className="flex flex-col gap-2">
+                                                <button
+                                                    onClick={copyToken}
+                                                    className={`w-full px-6 py-3 text-sm font-medium transition-colors cursor-pointer border ${copied
+                                                        ? "bg-[var(--color-surface)] text-[var(--color-text-primary)] border-[var(--color-border)]"
+                                                        : "bg-[var(--color-text-primary)] text-white border-[var(--color-text-primary)] hover:bg-black"
+                                                        }`}
+                                                >
+                                                    {copied ? "Copied!" : "Copy Link"}
+                                                </button>
+
+                                                <button
+                                                    onClick={handleShare}
+                                                    className="w-full px-6 py-3 bg-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] text-xs font-medium uppercase tracking-widest transition-colors cursor-pointer flex items-center justify-center gap-2 border border-transparent hover:border-[var(--color-border)]"
+                                                >
+                                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                    </svg>
+                                                    Generate New Link
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 ) : (

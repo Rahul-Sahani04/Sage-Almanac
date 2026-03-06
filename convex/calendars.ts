@@ -10,13 +10,14 @@ const SERVER_SALT = process.env.SERVER_SALT ?? "c-aleena-default-salt";
  */
 export const createCalendar = mutation({
   args: {
-    displayName: v.string(),
-    anonymousId: v.optional(v.string()),
+    partnerName: v.string(),
     password: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await resolveUser(ctx, args.anonymousId);
-    if (!userId) throw new Error("Unauthenticated (no valid identity or anonymousId)");
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthenticated. You must be logged in to create a journal.");
+    const userId = identity.subject;
+    const creatorName = identity.givenName || identity.name || "Creator";
 
     const rawToken = generateToken(16);
     const tokenHash = await hashToken(rawToken, SERVER_SALT);
@@ -32,15 +33,15 @@ export const createCalendar = mutation({
       inviteTokenHash: tokenHash,
       inviteExpiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
       passwordHash,
+      partnerName: args.partnerName,
       maxParticipants: 2,
       createdAt: Date.now(),
     });
 
-    // Auto-add creator as first participant
     await ctx.db.insert("participants", {
       calendarId,
       userId,
-      displayName: args.displayName,
+      displayName: creatorName,
       joinedAt: Date.now(),
     });
 
@@ -175,16 +176,6 @@ export const regenerateInviteToken = mutation({
     if (!calendar) throw new Error("Calendar not found");
     if (calendar.ownerId !== userId) throw new Error("Not the owner");
 
-    // Check if calendar already has max participants
-    const participants = await ctx.db
-      .query("participants")
-      .withIndex("by_calendar", (q) => q.eq("calendarId", args.calendarId))
-      .collect();
-
-    if (participants.length >= calendar.maxParticipants) {
-      throw new Error("Calendar already has maximum participants");
-    }
-
     const rawToken = generateToken(16);
     const tokenHash = await hashToken(rawToken, SERVER_SALT);
 
@@ -194,5 +185,28 @@ export const regenerateInviteToken = mutation({
     });
 
     return { rawToken };
+  },
+});
+
+/**
+ * Get basic info about a calendar invite token (for the join screen).
+ */
+export const getInviteInfo = query({
+  args: { rawToken: v.string() },
+  handler: async (ctx, args) => {
+    const tokenHash = await hashToken(args.rawToken, SERVER_SALT);
+    const calendars = await ctx.db.query("calendars").collect();
+    const calendar = calendars.find((c) => c.inviteTokenHash === tokenHash);
+
+    if (!calendar) return null;
+
+    if (calendar.inviteExpiresAt && calendar.inviteExpiresAt < Date.now()) {
+      return null;
+    }
+
+    return {
+      partnerName: calendar.partnerName || "Guest",
+      requiresPassword: !!calendar.passwordHash,
+    };
   },
 });

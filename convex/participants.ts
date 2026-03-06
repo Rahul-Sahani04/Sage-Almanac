@@ -13,7 +13,6 @@ const SERVER_SALT = process.env.SERVER_SALT ?? "c-aleena-default-salt";
 export const joinCalendar = mutation({
   args: {
     rawToken: v.string(),
-    displayName: v.string(),
     anonymousId: v.optional(v.string()),
     password: v.optional(v.string()),
   },
@@ -69,6 +68,30 @@ export const joinCalendar = mutation({
       .collect();
 
     if (participants.length >= calendar.maxParticipants) {
+      if (calendar.ownerId !== userId) {
+        // If the journal is full, and the user joining is not the owner,
+        // we assume the owner explicitly reshared the link because the partner lost access.
+        // Re-assign the partner slot.
+        const nonOwnerParticipant = participants.find((p) => p.userId !== calendar.ownerId);
+
+        if (nonOwnerParticipant) {
+          await ctx.db.patch(nonOwnerParticipant._id, {
+            userId,
+          });
+
+          // Consume token (single-use)
+          await ctx.db.patch(calendar._id, {
+            inviteTokenHash: null,
+            inviteExpiresAt: null,
+          });
+
+          return {
+            calendarId: calendar._id,
+            participantId: nonOwnerParticipant._id,
+            alreadyJoined: false,
+          };
+        }
+      }
       throw new Error("Calendar already has the maximum number of participants");
     }
 
@@ -76,7 +99,7 @@ export const joinCalendar = mutation({
     const participantId = await ctx.db.insert("participants", {
       calendarId: calendar._id,
       userId,
-      displayName: args.displayName,
+      displayName: calendar.partnerName || "Guest",
       joinedAt: Date.now(),
     });
 

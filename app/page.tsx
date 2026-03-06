@@ -17,7 +17,7 @@ export default function HomePage() {
     );
     const createCalendar = useMutation(api.calendars.createCalendar);
     const [showCreate, setShowCreate] = useState(false);
-    const [displayName, setDisplayName] = useState("");
+    const [partnerName, setPartnerName] = useState("");
     const [password, setPassword] = useState("");
     const [usePassword, setUsePassword] = useState(false);
     const [inviteToken, setInviteToken] = useState<string | null>(null);
@@ -25,16 +25,16 @@ export default function HomePage() {
     const [copied, setCopied] = useState(false);
 
     const handleCreate = async () => {
-        if (!displayName.trim()) return;
+        if (!partnerName.trim()) return;
         setCreating(true);
         try {
-            const args: any = { displayName: displayName.trim(), anonymousId };
+            const args: any = { partnerName: partnerName.trim() };
             if (usePassword && password) {
                 args.password = password;
             }
             const result = await createCalendar(args);
             setInviteToken(result.rawToken);
-            setDisplayName("");
+            setPartnerName("");
         } catch (error) {
             console.error("Failed to create calendar:", error);
         }
@@ -66,8 +66,12 @@ export default function HomePage() {
             <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-md sticky top-0 z-30">
                 <div className="max-w-5xl mx-auto px-4 sm:px-8 py-5 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-3 group">
-                        <div className="w-12 h-12 bg-[var(--color-primary)] flex items-center justify-center text-white font-display italic font-bold text-xl shadow-sm transition-transform group-hover:scale-105">
-                            C
+                        <div className="w-12 h-12 bg-[var(--color-primary)] flex items-center justify-center text-white font-display italicshadow-sm transition-transform group-hover:scale-105">
+                            <img
+                                src="/images/navLogo.png"
+                                alt="Logo"
+                                className="w-full h-full object-conta"
+                            />
                         </div>
                         <div>
                             <h1 className="font-display italic text-2xl font-medium text-[var(--color-text-primary)] tracking-tight leading-none">
@@ -151,8 +155,8 @@ export default function HomePage() {
                                             />
                                         ) : (
                                             <CreateCalendarForm
-                                                displayName={displayName}
-                                                setDisplayName={setDisplayName}
+                                                partnerName={partnerName}
+                                                setPartnerName={setPartnerName}
                                                 usePassword={usePassword}
                                                 setUsePassword={setUsePassword}
                                                 password={password}
@@ -351,8 +355,8 @@ function HeroSection() {
 
 /* ─────────────── Create Calendar Form ─────────────── */
 function CreateCalendarForm({
-    displayName,
-    setDisplayName,
+    partnerName,
+    setPartnerName,
     usePassword,
     setUsePassword,
     password,
@@ -361,8 +365,8 @@ function CreateCalendarForm({
     onSubmit,
     onCancel,
 }: {
-    displayName: string;
-    setDisplayName: (v: string) => void;
+    partnerName: string;
+    setPartnerName: (v: string) => void;
     usePassword?: boolean;
     setUsePassword?: (v: boolean) => void;
     password?: string;
@@ -383,12 +387,12 @@ function CreateCalendarForm({
             <div className="grid grid-cols-1 gap-8">
                 <div>
                     <label className="block text-xs font-bold uppercase tracking-widest text-[var(--color-text-primary)] mb-3">
-                        Your Signature <span className="text-[var(--color-primary)]">*</span>
+                        Who are you sharing with? <span className="text-[var(--color-primary)]">*</span>
                     </label>
                     <input
-                        value={displayName}
-                        onChange={(e) => setDisplayName(e.target.value)}
-                        placeholder="Your name"
+                        value={partnerName}
+                        onChange={(e) => setPartnerName(e.target.value)}
+                        placeholder="Your partner's name"
                         className="w-full px-0 py-3 bg-transparent border-b border-[var(--color-border)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)] transition-colors text-lg focus:outline-none font-display italic"
                     />
                 </div>
@@ -440,7 +444,7 @@ function CreateCalendarForm({
                 </button>
                 <button
                     onClick={onSubmit}
-                    disabled={!displayName.trim() || creating}
+                    disabled={!partnerName.trim() || creating}
                     className="px-8 py-3 bg-[var(--color-text-primary)] text-white text-sm font-medium hover:bg-black transition-colors disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
                 >
                     {creating ? "Creating..." : "Create Journal"}
