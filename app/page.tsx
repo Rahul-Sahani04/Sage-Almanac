@@ -61,7 +61,7 @@ export default function HomePage() {
     }
 
     return (
-        <div className="min-h-screen bg-[var(--color-surface)] selection:bg-[var(--color-primary)] selection:text-white">
+        <div className="min-h-screen relative bg-[var(--color-surface)] selection:bg-[var(--color-primary)] selection:text-white pb-24">
             {/* Header */}
             <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-md sticky top-0 z-30">
                 <div className="max-w-5xl mx-auto px-4 sm:px-8 py-5 flex items-center justify-between">
@@ -100,7 +100,7 @@ export default function HomePage() {
                 </div>
             </header>
 
-            <main className="max-w-5xl mx-auto px-4 sm:px-8 py-10 sm:py-16 mb-12">
+            <main className="max-w-5xl mx-auto px-4 sm:px-8 py-10 sm:py-16 ">
                 {(!isSignedIn && (!calendars || calendars.length === 0)) ? (
                     <HeroSection />
                 ) : (
