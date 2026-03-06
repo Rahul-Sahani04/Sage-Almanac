@@ -285,12 +285,12 @@ function HeroSection() {
                         <div className="h-px bg-[var(--color-primary)] w-12 lg:hidden" />
                     </div>
 
-                    <h1 className="font-display text-5xl sm:text-7xl lg:text-8xl text-[var(--color-text-primary)] mb-8 leading-[1.05] tracking-tight">
+                    <h1 className="font-display text-5xl sm:text-7xl lg:text-7xl text-[var(--color-text-primary)] mb-8 leading-[1.05] tracking-tight">
                         Every day is a <br className="hidden sm:block" />
                         <span className="italic text-[var(--color-primary)]">new page.</span>
                     </h1>
 
-                    <p className="text-lg sm:text-xl lg:text-2xl text-[var(--color-text-secondary)] max-w-2xl mb-12 leading-relaxed font-light mx-auto lg:mx-0">
+                    <p className="text-lg sm:text-xl lg:text-xl text-[var(--color-text-secondary)] max-w-2xl mb-12 leading-relaxed font-light mx-auto lg:mx-0">
                         A private, shared calendar for two. Leave daily notes, memories, and moments together in a beautifully tactile space.
                     </p>
 
@@ -317,7 +317,7 @@ function HeroSection() {
                         initial={{ y: 60 }}
                         animate={{ y: [50, 60, 50] }}
                         transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute left-0 bottom-0 w-56 sm:w-64 h-auto z-10"
+                        className="absolute left-0 bottom-0 w-56 sm:w-64 h-auto z-20"
                     >
                         <img
                             src="/images/boy.png"
@@ -331,7 +331,7 @@ function HeroSection() {
                         initial={{ y: -20 }}
                         animate={{ y: [10, -10, 10] }}
                         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                        className="absolute -right-6 top-0 w-56 sm:w-64 h-auto z-20"
+                        className="absolute -right-6 top-0 w-56 sm:w-64 h-auto z-30"
                     >
                         <img
                             src="/images/girl.png"
@@ -341,7 +341,7 @@ function HeroSection() {
                     </motion.div>
 
                     {/* Decorative glowing orb behind them */}
-                    <div className="absolute inset-x-10 inset-y-20 bg-gradient-to-tr from-[var(--color-primary)]/20 to-[var(--color-rose)]/20 rounded-full blur-3xl -z-10 animate-pulse" style={{ animationDuration: '4s' }} />
+                    <div className="absolute top-10 inset-x-10 inset-y-20 bg-gradient-to-tr from-[var(--color-primary)]/20 to-[var(--color-rose)]/20 rounded-full blur-3xl z-10 animate-pulse" style={{ animationDuration: '4s' }} />
                 </motion.div>
             </div>
 
