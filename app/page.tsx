@@ -66,11 +66,11 @@ export default function HomePage() {
             <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-md sticky top-0 z-30">
                 <div className="max-w-5xl mx-auto px-4 sm:px-8 py-5 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-3 group">
-                        <div className="w-12 h-12 bg-[var(--color-primary)] flex items-center justify-center text-white font-display italicshadow-sm transition-transform group-hover:scale-105">
+                        <div className="w-12 h-12 bg-[var(--color-primary)] rounded-md flex items-center justify-center text-white font-display italic p-0 shadow-sm transition-transform group-hover:scale-105">
                             <img
                                 src="/images/navLogo.png"
-                                alt="Logo"
-                                className="w-full h-full object-conta"
+                                alt="NavLogo"
+                                className="w-full h-full object-cover "
                             />
                         </div>
                         <div>
