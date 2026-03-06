@@ -1,6 +1,5 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { todayISO } from "./utils";
 import { resolveUser } from "./authUtils";
 
 /**
@@ -33,17 +32,23 @@ export const addNote = mutation({
 
     if (!participant) throw new Error("Not a participant of this calendar");
 
-    // Enforce: date must be today (UTC)
-    const today = todayISO();
-    if (args.date !== today) {
-      throw new Error("Notes can only be added for today");
+    // Enforce: date must be approximately today (±1.5 day tolerance for timezones)
+    // Users in UTC-12 to UTC+14 may have a different local date than the server's UTC.
+    const serverUtcDate = new Date();
+    const targetDate = new Date(args.date + "T12:00:00Z");
+    const diffDays = Math.abs(
+      (serverUtcDate.getTime() - targetDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (diffDays > 1.5) {
+      throw new Error("Notes can only be added for your local today");
     }
 
     // Rate limit: max 10 notes per day per user
     const todayNotes = await ctx.db
       .query("notes")
       .withIndex("by_calendar_date", (q) =>
-        q.eq("calendarId", args.calendarId).eq("date", today)
+        q.eq("calendarId", args.calendarId).eq("date", args.date)
       )
       .collect();
 
@@ -90,15 +95,21 @@ export const getMonthView = query({
 
     if (!participant) return [];
 
-    // Get all notes for this calendar
-    const allNotes = await ctx.db
-      .query("notes")
-      .withIndex("by_calendar", (q) => q.eq("calendarId", args.calendarId))
-      .collect();
+    // Use bounded index range to load only the requested month's notes
+    const startBound = `${args.year}-${String(args.month).padStart(2, "0")}-00`;
+    const nextMonth = args.month === 12 ? 1 : args.month + 1;
+    const nextYear = args.month === 12 ? args.year + 1 : args.year;
+    const endBound = `${nextYear}-${String(nextMonth).padStart(2, "0")}-00`;
 
-    // Filter to the requested month
-    const monthPrefix = `${args.year}-${String(args.month).padStart(2, "0")}`;
-    const monthNotes = allNotes.filter((n) => n.date.startsWith(monthPrefix));
+    const monthNotes = await ctx.db
+      .query("notes")
+      .withIndex("by_calendar_date", (q) =>
+        q
+          .eq("calendarId", args.calendarId)
+          .gte("date", startBound)
+          .lt("date", endBound)
+      )
+      .collect();
 
     // Aggregate by day
     const dayMap = new Map<string, { noteCount: number; authors: Set<string> }>();

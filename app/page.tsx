@@ -100,7 +100,7 @@ export default function HomePage() {
                 </div>
             </header>
 
-            <main className="max-w-5xl mx-auto px-4 sm:px-8 py-10 sm:py-16">
+            <main className="max-w-5xl mx-auto px-4 sm:px-8 py-10 sm:py-16 mb-12">
                 {(!isSignedIn && (!calendars || calendars.length === 0)) ? (
                     <HeroSection />
                 ) : (
@@ -252,7 +252,7 @@ export default function HomePage() {
             </main>
 
             {/* Footer */}
-            <footer className="border-t border-[var(--color-border)] bg-[var(--color-surface)] mt-auto">
+            <footer className="absolute bottom-0 w-full mt-10 border-t border-[var(--color-border)] bg-[var(--color-surface)] mt-auto">
                 <div className="max-w-5xl mx-auto px-4 sm:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <p className="text-sm text-[var(--color-text-muted)] font-display italic text-lg">
                         C-Aleena.

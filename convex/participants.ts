@@ -21,11 +21,11 @@ export const joinCalendar = mutation({
     if (!userId) throw new Error("Unauthenticated");
     const tokenHash = await hashToken(args.rawToken, SERVER_SALT);
 
-    // Find calendar by token hash
-    const calendars = await ctx.db.query("calendars").collect();
-    const calendar = calendars.find(
-      (c) => c.inviteTokenHash === tokenHash
-    );
+    // Find calendar by token hash using index (no full table scan)
+    const calendar = await ctx.db
+      .query("calendars")
+      .withIndex("by_invite_token", (q) => q.eq("inviteTokenHash", tokenHash))
+      .first();
 
     if (!calendar) throw new Error("Invalid or expired invite token");
 
@@ -61,7 +61,7 @@ export const joinCalendar = mutation({
       };
     }
 
-    // Check participant count
+    // Check participant count — reject if full (no silent takeover)
     const participants = await ctx.db
       .query("participants")
       .withIndex("by_calendar", (q) => q.eq("calendarId", calendar._id))
@@ -114,6 +114,47 @@ export const joinCalendar = mutation({
       participantId,
       alreadyJoined: false,
     };
+  },
+});
+
+/**
+ * Remove a participant from a calendar (owner only).
+ * Frees up a slot so the owner can invite a new partner.
+ */
+export const removeParticipant = mutation({
+  args: {
+    calendarId: v.id("calendars"),
+    participantId: v.id("participants"),
+    anonymousId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await resolveUser(ctx, args.anonymousId);
+    if (!userId) throw new Error("Unauthenticated");
+
+    const calendar = await ctx.db.get(args.calendarId);
+    if (!calendar) throw new Error("Calendar not found");
+    if (calendar.ownerId !== userId) throw new Error("Only the calendar owner can remove participants");
+
+    const participant = await ctx.db.get(args.participantId);
+    if (!participant) throw new Error("Participant not found");
+    if (participant.calendarId !== args.calendarId) throw new Error("Participant does not belong to this calendar");
+    if (participant.userId === userId) throw new Error("Owner cannot remove themselves");
+
+    // Delete the participant's notes
+    const notes = await ctx.db
+      .query("notes")
+      .withIndex("by_calendar", (q) => q.eq("calendarId", args.calendarId))
+      .collect();
+
+    const participantNotes = notes.filter((n) => n.participantId === args.participantId);
+    for (const note of participantNotes) {
+      await ctx.db.delete(note._id);
+    }
+
+    // Delete the participant
+    await ctx.db.delete(args.participantId);
+
+    return { success: true };
   },
 });
 

@@ -195,8 +195,10 @@ export const getInviteInfo = query({
   args: { rawToken: v.string() },
   handler: async (ctx, args) => {
     const tokenHash = await hashToken(args.rawToken, SERVER_SALT);
-    const calendars = await ctx.db.query("calendars").collect();
-    const calendar = calendars.find((c) => c.inviteTokenHash === tokenHash);
+    const calendar = await ctx.db
+      .query("calendars")
+      .withIndex("by_invite_token", (q) => q.eq("inviteTokenHash", tokenHash))
+      .first();
 
     if (!calendar) return null;
 

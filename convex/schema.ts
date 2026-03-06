@@ -12,7 +12,8 @@ export default defineSchema({
     maxParticipants: v.number(),
     createdAt: v.number(),
   })
-    .index("by_owner", ["ownerId"]),
+    .index("by_owner", ["ownerId"])
+    .index("by_invite_token", ["inviteTokenHash"]),
 
   participants: defineTable({
     calendarId: v.id("calendars"),
