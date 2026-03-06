@@ -5,10 +5,10 @@
   <br>
 </h1>
 
-<h4 align="center">A beautifully crafted, intimate shared calendar experience for couples.</h4>
+<h4 align="center">A beautifully made, friendly shared calendar experience for couples / friends / long distance people.</h4>
 
 <p align="center">
-  <img src="./public/images/og.webp" alt="C-Aleena Banner" width="100%">
+  <img src="./public/images/Waguri_Rintaro.jpeg" alt="C-Aleena Banner" width="100%">
 </p>
 
 <br>
@@ -21,7 +21,7 @@ Built with modern web technologies, C-Aleena offers real-time synchronization, s
 
 ## Features
 
-- **Intimate Design:** A journal-like aesthetic with soft glowing dates, curated typography, and ambient animations to create a premium feel.
+- **Friendly Design:** A journal-like aesthetic with soft glowing dates, curated typography, and ambient animations to create a premium feel.
 - **Real-Time Synchronization:** Instant updates across devices using Convex, ensuring both partners are always in sync.
 - **Shared Memories & Notes:** Add notes, memories, or plans to specific dates, visible instantly to your partner.
 - **Secure & Private:** Partner connection is handled via secure, expiring invite tokens.

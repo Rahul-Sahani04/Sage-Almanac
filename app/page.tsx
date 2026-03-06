@@ -310,18 +310,38 @@ function HeroSection() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                    className="w-full max-w-md lg:w-[450px] shrink-0 relative mt-10 lg:mt-0"
+                    className="w-full max-w-md lg:w-[450px] shrink-0 relative mt-10 lg:mt-0 flex items-center justify-center h-[400px] lg:h-[450px]"
                 >
-                    {/* Shadow offset block */}
-                    {/* <div className="absolute inset-0 bg-[var(--color-primary)] translate-x-4 translate-y-4 -z-10 bg-opacity-90" /> */}
-                    {/* Image with white background so transparency pops nicely against it */}
-                    <div className=" p-2">
+                    {/* Boy Character */}
+                    <motion.div
+                        initial={{ y: 60 }}
+                        animate={{ y: [50, 60, 50] }}
+                        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                        className="absolute left-0 bottom-0 w-56 sm:w-64 h-auto z-10"
+                    >
                         <img
-                            src="/images/HeroImageSideIlusstration.webp"
-                            alt="A beautiful tactile journal illustration"
-                            className="w-full h-auto object-cover hover:opacity-90 transition-opacity backdrop-shadow-lg "
+                            src="/images/boy.png"
+                            alt="Boy Character"
+                            className="w-full h-auto object-contain drop-shadow-2xl"
                         />
-                    </div>
+                    </motion.div>
+
+                    {/* Girl Character */}
+                    <motion.div
+                        initial={{ y: -20 }}
+                        animate={{ y: [10, -10, 10] }}
+                        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                        className="absolute -right-6 top-0 w-56 sm:w-64 h-auto z-20"
+                    >
+                        <img
+                            src="/images/girl.png"
+                            alt="Girl Character"
+                            className="w-full h-auto object-contain drop-shadow-2xl"
+                        />
+                    </motion.div>
+
+                    {/* Decorative glowing orb behind them */}
+                    <div className="absolute inset-x-10 inset-y-20 bg-gradient-to-tr from-[var(--color-primary)]/20 to-[var(--color-rose)]/20 rounded-full blur-3xl -z-10 animate-pulse" style={{ animationDuration: '4s' }} />
                 </motion.div>
             </div>
 
