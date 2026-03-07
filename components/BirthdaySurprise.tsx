@@ -268,10 +268,14 @@ export default function BirthdaySurprise({ calendarId }: BirthdaySurpriseProps) 
                                                 onClick={handlePopConfetti}
                                                 className="group relative overflow-hidden flex items-center justify-center gap-3 px-8 py-4 bg-white/80 backdrop-blur-md border border-[#e11d48]/30 text-[#9f1239] rounded-full shadow-lg hover:shadow-xl hover:bg-white hover:scale-105 transition-all duration-300 w-full sm:w-auto z-10 cursor-pointer"
                                             >
-                                                <span className="relative z-10 text-sm font-bold uppercase tracking-widest">Claim your wishes</span>
-                                                <svg className="relative z-10 w-5 h-5 group-hover:rotate-12 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <span className="relative z-10 text-sm font-bold uppercase tracking-widest overflow-hidden">Claim your wishes</span>
+                                                {/* <svg className="relative z-10 w-5 h-5 group-hover:rotate-12 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                                                </svg>
+                                                </svg> */}
+                                                <span className="opacity-0 mr-6">_</span>
+
+                                                <img src="/images/special/unya_toonout.png" alt="Confetti" className="absolute right-12 md:right-4 -bottom-16 group-hover:-bottom-2 z-10 w-16 h-16 group-hover:rotate-12 transition-all duration-300" />
+
                                             </motion.button>
                                         ) : (
                                             <motion.button
