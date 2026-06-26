@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { resolveUser } from "./authUtils";
 
 /**
@@ -70,7 +71,7 @@ export const addNote = mutation({
       throw new Error("Maximum notes per day reached (10)");
     }
 
-    return await ctx.db.insert("notes", {
+    const noteId = await ctx.db.insert("notes", {
       calendarId: args.calendarId,
       participantId: participant._id,
       authorName: participant.displayName,
@@ -79,6 +80,15 @@ export const addNote = mutation({
       imageId: args.imageId,
       createdAt: Date.now(),
     });
+
+    await ctx.scheduler.runAfter(0, internal.notifications.notifyPartner, {
+      calendarId: args.calendarId,
+      authorName: participant.displayName,
+      date: args.date,
+      authorUserId: userId,
+    });
+
+    return noteId;
   },
 });
 

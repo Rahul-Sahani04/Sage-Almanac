@@ -9,6 +9,28 @@ import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import { useAnonymousId } from "@/hooks/useAnonymousId";
 
+function resizeToWebP(file: File, maxDim: number): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(
+        (b) => (b ? resolve(b) : reject(new Error("WebP conversion failed"))),
+        "image/webp",
+        0.85
+      );
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Failed to load image")); };
+    img.src = url;
+  });
+}
+
 interface NoteInputProps {
     calendarId: Id<"calendars">;
     date: string;
@@ -45,15 +67,16 @@ export default function NoteInput({ calendarId, date }: NoteInputProps) {
         setIsUploading(true);
         setError(null);
         try {
+            const webpBlob = await resizeToWebP(file, 1200);
             const uploadUrl = await generateUploadUrl();
             const res = await fetch(uploadUrl, {
                 method: "POST",
-                headers: { "Content-Type": file.type },
-                body: file,
+                headers: { "Content-Type": "image/webp" },
+                body: webpBlob,
             });
             const { storageId } = await res.json();
             setImageId(storageId as Id<"_storage">);
-            setImagePreview(URL.createObjectURL(file));
+            setImagePreview(URL.createObjectURL(webpBlob));
         } catch {
             setError("Failed to upload image");
         }
