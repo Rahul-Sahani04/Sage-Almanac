@@ -10,9 +10,11 @@
 
 import type * as authUtils from "../authUtils.js";
 import type * as calendars from "../calendars.js";
+import type * as crons from "../crons.js";
 import type * as debug from "../debug.js";
 import type * as markers from "../markers.js";
 import type * as notes from "../notes.js";
+import type * as notifications from "../notifications.js";
 import type * as participants from "../participants.js";
 import type * as utils from "../utils.js";
 
@@ -25,9 +27,11 @@ import type {
 declare const fullApi: ApiFromModules<{
   authUtils: typeof authUtils;
   calendars: typeof calendars;
+  crons: typeof crons;
   debug: typeof debug;
   markers: typeof markers;
   notes: typeof notes;
+  notifications: typeof notifications;
   participants: typeof participants;
   utils: typeof utils;
 }>;
