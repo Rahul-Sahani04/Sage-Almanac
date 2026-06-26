@@ -3,8 +3,11 @@ import { mutation, query } from "./_generated/server";
 import { hashToken } from "./utils";
 import { resolveUser } from "./authUtils";
 
-const SERVER_SALT = process.env.SERVER_SALT;
-if (!SERVER_SALT) throw new Error("Set SERVER_SALT in your Convex environment variables");
+function getSalt(): string {
+  const s = process.env.SERVER_SALT;
+  if (!s) throw new Error("Set SERVER_SALT in your Convex environment variables");
+  return s;
+}
 
 /**
  * Join a calendar using an invite token.
@@ -20,7 +23,7 @@ export const joinCalendar = mutation({
   handler: async (ctx, args) => {
     const userId = await resolveUser(ctx, args.anonymousId);
     if (!userId) throw new Error("Unauthenticated");
-    const tokenHash = await hashToken(args.rawToken, SERVER_SALT);
+    const tokenHash = await hashToken(args.rawToken, getSalt());
 
     // Find calendar by token hash using index (no full table scan)
     const calendar = await ctx.db
@@ -40,7 +43,7 @@ export const joinCalendar = mutation({
       if (!args.password) {
         return { passwordRequired: true };
       }
-      const providedHash = await hashToken(args.password, SERVER_SALT);
+      const providedHash = await hashToken(args.password, getSalt());
       if (providedHash !== calendar.passwordHash) {
         throw new Error("Incorrect password");
       }

@@ -53,6 +53,7 @@ export default function CalendarGrid({
         data: DayAggregate | undefined;
         isToday: boolean;
         isPast: boolean;
+        hasMarker: boolean;
     })[] = [];
 
     // Leading empty cells

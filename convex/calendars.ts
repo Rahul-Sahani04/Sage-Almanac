@@ -3,8 +3,11 @@ import { mutation, query } from "./_generated/server";
 import { generateToken, hashToken } from "./utils";
 import { resolveUser } from "./authUtils";
 
-const SERVER_SALT = process.env.SERVER_SALT;
-if (!SERVER_SALT) throw new Error("Set SERVER_SALT in your Convex environment variables");
+function getSalt(): string {
+  const s = process.env.SERVER_SALT;
+  if (!s) throw new Error("Set SERVER_SALT in your Convex environment variables");
+  return s;
+}
 
 /**
  * Create a new calendar — returns the calendar ID and raw invite token (shown once).
@@ -21,11 +24,11 @@ export const createCalendar = mutation({
     const creatorName = identity.givenName || identity.name || "Creator";
 
     const rawToken = generateToken(16);
-    const tokenHash = await hashToken(rawToken, SERVER_SALT);
+    const tokenHash = await hashToken(rawToken, getSalt());
 
     let passwordHash = undefined;
     if (args.password) {
-      passwordHash = await hashToken(args.password, SERVER_SALT);
+      passwordHash = await hashToken(args.password, getSalt());
     }
 
     const calendarId = await ctx.db.insert("calendars", {
@@ -178,7 +181,7 @@ export const regenerateInviteToken = mutation({
     if (calendar.ownerId !== userId) throw new Error("Not the owner");
 
     const rawToken = generateToken(16);
-    const tokenHash = await hashToken(rawToken, SERVER_SALT);
+    const tokenHash = await hashToken(rawToken, getSalt());
 
     await ctx.db.patch(args.calendarId, {
       inviteTokenHash: tokenHash,
@@ -195,7 +198,7 @@ export const regenerateInviteToken = mutation({
 export const getInviteInfo = query({
   args: { rawToken: v.string() },
   handler: async (ctx, args) => {
-    const tokenHash = await hashToken(args.rawToken, SERVER_SALT);
+    const tokenHash = await hashToken(args.rawToken, getSalt());
     const calendar = await ctx.db
       .query("calendars")
       .withIndex("by_invite_token", (q) => q.eq("inviteTokenHash", tokenHash))
