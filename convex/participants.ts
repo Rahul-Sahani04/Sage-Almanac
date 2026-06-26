@@ -152,6 +152,7 @@ export const removeParticipant = mutation({
 
     const participantNotes = notes.filter((n) => n.participantId === args.participantId);
     for (const note of participantNotes) {
+      if (note.imageId) await ctx.storage.delete(note.imageId);
       await ctx.db.delete(note._id);
     }
 

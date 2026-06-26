@@ -142,12 +142,13 @@ export const deleteCalendar = mutation({
     if (!calendar) throw new Error("Calendar not found");
     if (calendar.ownerId !== userId) throw new Error("Not authorized");
 
-    // Delete all notes
+    // Delete all notes and their storage assets
     const notes = await ctx.db
       .query("notes")
       .withIndex("by_calendar", (q) => q.eq("calendarId", args.calendarId))
       .collect();
     for (const note of notes) {
+      if (note.imageId) await ctx.storage.delete(note.imageId);
       await ctx.db.delete(note._id);
     }
 
