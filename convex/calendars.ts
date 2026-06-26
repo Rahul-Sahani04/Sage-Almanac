@@ -3,7 +3,8 @@ import { mutation, query } from "./_generated/server";
 import { generateToken, hashToken } from "./utils";
 import { resolveUser } from "./authUtils";
 
-const SERVER_SALT = process.env.SERVER_SALT ?? "Sage-Almanac-default-salt";
+const SERVER_SALT = process.env.SERVER_SALT;
+if (!SERVER_SALT) throw new Error("Set SERVER_SALT in your Convex environment variables");
 
 /**
  * Create a new calendar — returns the calendar ID and raw invite token (shown once).
@@ -29,7 +30,7 @@ export const createCalendar = mutation({
 
     const calendarId = await ctx.db.insert("calendars", {
       ownerId: userId,
-      title: "Shared Journal",
+      title: `Journal with ${args.partnerName}`,
       inviteTokenHash: tokenHash,
       inviteExpiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
       passwordHash,
@@ -209,6 +210,7 @@ export const getInviteInfo = query({
     return {
       partnerName: calendar.partnerName || "Guest",
       requiresPassword: !!calendar.passwordHash,
+      expiresAt: calendar.inviteExpiresAt ?? null,
     };
   },
 });

@@ -3,7 +3,8 @@ import { mutation, query } from "./_generated/server";
 import { hashToken } from "./utils";
 import { resolveUser } from "./authUtils";
 
-const SERVER_SALT = process.env.SERVER_SALT ?? "Sage-Almanac-default-salt";
+const SERVER_SALT = process.env.SERVER_SALT;
+if (!SERVER_SALT) throw new Error("Set SERVER_SALT in your Convex environment variables");
 
 /**
  * Join a calendar using an invite token.

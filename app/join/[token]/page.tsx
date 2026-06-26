@@ -29,7 +29,7 @@ export default function JoinPage() {
         setError(null);
 
         try {
-            const args: any = {
+            const args: { rawToken: string; anonymousId?: string; password?: string } = {
                 rawToken: token,
                 anonymousId,
             };
@@ -129,9 +129,14 @@ export default function JoinPage() {
                         <h1 className="font-display italic text-3xl text-[var(--color-text-primary)] mb-2">
                             You&apos;ve Been Invited
                         </h1>
-                        <p className="text-base text-[var(--color-text-secondary)] mb-8 leading-relaxed">
+                        <p className="text-base text-[var(--color-text-secondary)] mb-2 leading-relaxed">
                             Someone special invited you to share a private journal as <strong>{inviteInfo.partnerName}</strong>.
                         </p>
+                        {inviteInfo.expiresAt && (
+                            <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-widest mb-8">
+                                Expires {new Date(inviteInfo.expiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                            </p>
+                        )}
 
                         {success ? (
                             <motion.div
