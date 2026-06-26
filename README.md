@@ -13,6 +13,16 @@
 
 <br>
 
+## Screenshots
+
+  <img src="./public/screenshots/Home.webp" alt="Sage-Almanac Home" width="100%">
+  <img src="./public/screenshots/Calender-Page.webp" alt="Calendar View" width="100%">
+  <img src="./public/screenshots/Note-Entry.webp" alt="Note Entry" width="100%">
+  <img src="./public/screenshots/Create-Journal.webp" alt="Create Journal" width="100%">
+</p>
+
+<br>
+
 ## Overview
 
 **Sage-Almanac** is a premium, minimalist shared calendar application designed specifically for couples. It moves away from the utilitarian feel of traditional calendar apps and introduces a warm, journal-like aesthetic. It serves not just as a scheduling tool, but as a shared space for moments, notes, and milestones.
@@ -24,7 +34,12 @@ Built with modern web technologies, Sage-Almanac offers real-time synchronizatio
 - **Friendly Design:** A journal-like aesthetic with soft glowing dates, curated typography, and ambient animations to create a premium feel.
 - **Real-Time Synchronization:** Instant updates across devices using Convex, ensuring both partners are always in sync.
 - **Shared Memories & Notes:** Add notes, memories, or plans to specific dates, visible instantly to your partner.
-- **Secure & Private:** Partner connection is handled via secure, expiring invite tokens.
+- **Photo Attachments:** Attach images to journal entries (up to 5MB), stored securely via Convex file storage.
+- **Special Day Markers:** Star any date to mark it as significant — anniversaries, milestones, first times. Visible to both partners on the calendar grid.
+- **Writing Streak Counter:** Tracks consecutive days both partners have written together, encouraging daily journaling habits.
+- **Journal Rename:** Owners can rename their shared journal inline — just click the title.
+- **Login-Gated Writing:** Browsing the calendar is open, but saving entries requires a signed-in account to ensure authorship is always tracked.
+- **Secure & Private:** Partner connection is handled via secure, single-use, expiring invite tokens (7-day window).
 - **Responsive & Fluid:** Beautifully rendered on all devices, with rich micro-interactions powered by Framer Motion.
 
 ## Tech Stack
@@ -68,9 +83,16 @@ Ensure you have [Node.js](https://nodejs.org/) installed along with your preferr
    ```env
    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
    CLERK_SECRET_KEY=your_clerk_secret_key
-   
+
    CONVEX_DEPLOYMENT=your_convex_deployment
    NEXT_PUBLIC_CONVEX_URL=your_convex_url
+   ```
+
+   Additionally, set these in your **Convex dashboard** under Environment Variables:
+
+   ```
+   SERVER_SALT=<random secret string>        # used to hash invite tokens and passwords
+   CLERK_JWT_ISSUER_DOMAIN=https://your-app.clerk.accounts.dev
    ```
 
 4. **Initialize Convex Backend**
@@ -99,7 +121,8 @@ The backend is completely serverless and real-time, managed by Convex.
 
 - **`calendars`**: Tracks the shared calendar instance, its owner, the partner's name, and invitation constraints.
 - **`participants`**: Links users to a specific calendar space.
-- **`notes`**: Stores individual dated entries, memories, or plans shared between the couple.
+- **`notes`**: Stores individual dated entries, memories, or plans shared between the couple. Supports optional image attachments via Convex file storage.
+- **`markers`**: Stores special day labels per calendar and date, used to highlight significant moments on the grid.
 
 All operations strictly enforce authentication via Clerk, and Convex resolvers ensure that only verified participants can read or modify calendar data.
 

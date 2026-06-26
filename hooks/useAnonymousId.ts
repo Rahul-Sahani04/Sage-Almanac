@@ -6,10 +6,10 @@ export function useAnonymousId() {
 
     useEffect(() => {
         try {
-            let storedId = localStorage.getItem("cAleena_anonId");
+            let storedId = localStorage.getItem("sage_anonId");
             if (!storedId) {
                 storedId = `anon_${window.crypto.randomUUID()}`;
-                localStorage.setItem("cAleena_anonId", storedId);
+                localStorage.setItem("sage_anonId", storedId);
             }
             setAnonymousId(storedId);
         } catch (error) {
