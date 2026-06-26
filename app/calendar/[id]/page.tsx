@@ -14,7 +14,6 @@ import DayModal from "@/components/DayModal";
 import NoteList from "@/components/NoteList";
 import NoteInput from "@/components/NoteInput";
 import { getMonthName, todayISO, isToday, isPast, formatDateDisplay } from "@/lib/dates";
-import BirthdaySurprise from "@/components/BirthdaySurprise";
 
 export default function CalendarPage() {
     const params = useParams();
@@ -229,9 +228,6 @@ export default function CalendarPage() {
             </header>
 
             <main className="max-w-4xl mx-auto px-4 sm:px-8 mt-12 sm:mt-16">
-                {/* Birthday Surprise Banner */}
-                <BirthdaySurprise calendarId={calendarId} />
-
                 {/* Journal Navigation layout */}
                 <div className="flex flex-col sm:flex-row items-center justify-between mb-10 gap-6">
                     <div className="text-center sm:text-left flex-1">
