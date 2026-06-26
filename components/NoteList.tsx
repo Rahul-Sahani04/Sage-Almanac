@@ -7,6 +7,7 @@ interface Note {
     authorName: string;
     content: string;
     createdAt: number;
+    imageUrl?: string | null;
 }
 
 interface NoteListProps {
@@ -74,6 +75,13 @@ export default function NoteList({ notes }: NoteListProps) {
                                     <p className="text-base text-[var(--color-text-primary)] leading-relaxed whitespace-pre-wrap font-sans">
                                         {note.content}
                                     </p>
+                                    {note.imageUrl && (
+                                        <img
+                                            src={note.imageUrl}
+                                            alt=""
+                                            className="mt-4 max-h-64 w-full object-cover border border-[var(--color-border)]"
+                                        />
+                                    )}
                                 </div>
                                 {/* Drop shadow box underlying */}
                                 <div className="absolute inset-0 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] translate-x-1.5 translate-y-1.5 -z-10 transition-transform group-hover:translate-x-2 group-hover:translate-y-2 duration-300" />

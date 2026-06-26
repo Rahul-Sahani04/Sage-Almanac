@@ -9,6 +9,7 @@ interface DayCellProps {
     authors: string[];
     isToday: boolean;
     isPast: boolean;
+    hasMarker: boolean;
     onClick: () => void;
 }
 
@@ -18,6 +19,7 @@ export default function DayCell({
     authors,
     isToday,
     isPast,
+    hasMarker,
     onClick,
 }: DayCellProps) {
     // Determine unique author count for multi-color dots
@@ -36,6 +38,13 @@ export default function DayCell({
                 }
             `}
         >
+            {/* Special day marker indicator */}
+            {hasMarker && (
+                <div className="absolute top-1 left-1.5 text-[var(--color-primary)] text-[10px] leading-none pointer-events-none select-none">
+                    ★
+                </div>
+            )}
+
             {/* Top corner for today indicator */}
             {isToday && (
                 <div className="absolute top-0 right-0 w-8 h-8 pointer-events-none overflow-hidden">

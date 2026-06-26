@@ -6,16 +6,27 @@ import { resolveUser } from "./authUtils";
  * Add a note to a calendar for a specific day.
  * Enforces: auth, participant check, date === today (UTC).
  */
+export const generateUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Must be signed in to upload images");
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
 export const addNote = mutation({
   args: {
     calendarId: v.id("calendars"),
     content: v.string(),
     date: v.string(), // YYYY-MM-DD
     anonymousId: v.optional(v.string()),
+    imageId: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
     const userId = await resolveUser(ctx, args.anonymousId);
     if (!userId) throw new Error("Unauthenticated");
+    if (userId.startsWith("anon_")) throw new Error("Sign in to write notes");
 
     // Validate content
     const content = args.content.trim();
@@ -65,6 +76,7 @@ export const addNote = mutation({
       authorName: participant.displayName,
       date: args.date,
       content,
+      imageId: args.imageId,
       createdAt: Date.now(),
     });
   },
@@ -158,7 +170,63 @@ export const getDayNotes = query({
       )
       .collect();
 
-    // Sort by createdAt ascending
-    return notes.sort((a, b) => a.createdAt - b.createdAt);
+    const sorted = notes.sort((a, b) => a.createdAt - b.createdAt);
+    return await Promise.all(
+      sorted.map(async (note) => ({
+        ...note,
+        imageUrl: note.imageId ? await ctx.storage.getUrl(note.imageId) : null,
+      }))
+    );
+  },
+});
+
+export const getStreak = query({
+  args: {
+    calendarId: v.id("calendars"),
+    anonymousId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await resolveUser(ctx, args.anonymousId);
+    if (!userId) return 0;
+
+    const allParticipants = await ctx.db
+      .query("participants")
+      .withIndex("by_calendar", (q) => q.eq("calendarId", args.calendarId))
+      .collect();
+
+    if (allParticipants.length < 2) return 0;
+    if (!allParticipants.some((p) => p.userId === userId)) return 0;
+
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setUTCDate(ninetyDaysAgo.getUTCDate() - 90);
+    const startBound = ninetyDaysAgo.toISOString().split("T")[0];
+
+    const notes = await ctx.db
+      .query("notes")
+      .withIndex("by_calendar_date", (q) =>
+        q.eq("calendarId", args.calendarId).gte("date", startBound)
+      )
+      .collect();
+
+    // Map date → set of participantIds who wrote
+    const byDate = new Map<string, Set<string>>();
+    for (const note of notes) {
+      if (!byDate.has(note.date)) byDate.set(note.date, new Set());
+      byDate.get(note.date)!.add(String(note.participantId));
+    }
+
+    const participantIds = allParticipants.map((p) => String(p._id));
+
+    let streak = 0;
+    for (let i = 0; i < 90; i++) {
+      const d = new Date();
+      d.setUTCDate(d.getUTCDate() - i);
+      const dateStr = d.toISOString().split("T")[0];
+      const writers = byDate.get(dateStr);
+      if (!writers || !participantIds.every((pid) => writers.has(pid))) break;
+      streak++;
+    }
+
+    return streak;
   },
 });

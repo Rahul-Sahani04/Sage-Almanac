@@ -214,3 +214,25 @@ export const getInviteInfo = query({
     };
   },
 });
+
+export const renameCalendar = mutation({
+  args: {
+    calendarId: v.id("calendars"),
+    title: v.string(),
+    anonymousId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await resolveUser(ctx, args.anonymousId);
+    if (!userId) throw new Error("Unauthenticated");
+
+    const calendar = await ctx.db.get(args.calendarId);
+    if (!calendar) throw new Error("Calendar not found");
+    if (calendar.ownerId !== userId) throw new Error("Only the owner can rename this journal");
+
+    const title = args.title.trim();
+    if (!title) throw new Error("Title cannot be empty");
+    if (title.length > 50) throw new Error("Title too long (max 50 characters)");
+
+    await ctx.db.patch(args.calendarId, { title });
+  },
+});

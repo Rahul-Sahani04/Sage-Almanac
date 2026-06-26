@@ -11,6 +11,7 @@
 import type * as authUtils from "../authUtils.js";
 import type * as calendars from "../calendars.js";
 import type * as debug from "../debug.js";
+import type * as markers from "../markers.js";
 import type * as notes from "../notes.js";
 import type * as participants from "../participants.js";
 import type * as utils from "../utils.js";
@@ -25,6 +26,7 @@ declare const fullApi: ApiFromModules<{
   authUtils: typeof authUtils;
   calendars: typeof calendars;
   debug: typeof debug;
+  markers: typeof markers;
   notes: typeof notes;
   participants: typeof participants;
   utils: typeof utils;

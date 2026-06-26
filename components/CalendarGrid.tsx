@@ -22,6 +22,7 @@ interface CalendarGridProps {
     month: number;
     calendarId: string;
     monthData: DayAggregate[];
+    markersForMonth: { date: string }[];
     onDayClick: (date: string) => void;
 }
 
@@ -32,17 +33,18 @@ export default function CalendarGrid({
     month,
     calendarId,
     monthData,
+    markersForMonth,
     onDayClick,
 }: CalendarGridProps) {
     const daysInMonth = getDaysInMonth(year, month);
     const firstDay = getFirstDayOfMonth(year, month);
-    // const today = todayISO(); // Not strictly needed here if we use isToday from dates.ts
 
-    // Build a map for quick lookup
     const dataMap = new Map<string, DayAggregate>();
     for (const d of monthData) {
         dataMap.set(d.date, d);
     }
+
+    const markedDates = new Set(markersForMonth.map((m) => m.date));
 
     // Generate cells including leading empty cells
     const cells: (null | {
@@ -67,6 +69,7 @@ export default function CalendarGrid({
             data: dataMap.get(dateStr),
             isToday: isToday(dateStr),
             isPast: isPast(dateStr),
+            hasMarker: markedDates.has(dateStr),
         });
     }
 
@@ -119,6 +122,7 @@ export default function CalendarGrid({
                                 authors={cell.data?.authors || []}
                                 isToday={cell.isToday}
                                 isPast={cell.isPast}
+                                hasMarker={cell.hasMarker}
                                 onClick={() => onDayClick(cell.dateStr)}
                             />
                         </motion.div>

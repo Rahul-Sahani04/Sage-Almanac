@@ -31,8 +31,19 @@ export default defineSchema({
     authorName: v.string(),
     date: v.string(), // YYYY-MM-DD in UTC
     content: v.string(),
+    imageId: v.optional(v.id("_storage")),
     createdAt: v.number(),
   })
     .index("by_calendar_date", ["calendarId", "date"])
     .index("by_calendar", ["calendarId"]),
+
+  markers: defineTable({
+    calendarId: v.id("calendars"),
+    date: v.string(), // YYYY-MM-DD
+    label: v.string(),
+    createdBy: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_calendar", ["calendarId"])
+    .index("by_calendar_date", ["calendarId", "date"]),
 });
