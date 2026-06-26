@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "c-aleena",
+      "name": "Sage-Almanac",
       "dependencies": {
         "@clerk/nextjs": "^6.12.12",
         "@tailwindcss/postcss": "^4.0.15",

@@ -3,7 +3,7 @@ import { mutation, query } from "./_generated/server";
 import { generateToken, hashToken } from "./utils";
 import { resolveUser } from "./authUtils";
 
-const SERVER_SALT = process.env.SERVER_SALT ?? "c-aleena-default-salt";
+const SERVER_SALT = process.env.SERVER_SALT ?? "Sage-Almanac-default-salt";
 
 /**
  * Create a new calendar — returns the calendar ID and raw invite token (shown once).

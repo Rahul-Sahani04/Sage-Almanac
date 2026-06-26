@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  C-Aleena
+  Sage-Almanac
   <br>
   <br>
 </h1>
@@ -8,16 +8,16 @@
 <h4 align="center">A beautifully made, friendly shared calendar experience for couples / friends / long distance people.</h4>
 
 <p align="center">
-  <img src="./public/images/Waguri_Rintaro.jpeg" alt="C-Aleena Banner" width="100%">
+  <img src="./public/images/Waguri_Rintaro.jpeg" alt="Sage-Almanac Banner" width="100%">
 </p>
 
 <br>
 
 ## Overview
 
-**C-Aleena** is a premium, minimalist shared calendar application designed specifically for couples. It moves away from the utilitarian feel of traditional calendar apps and introduces a warm, journal-like aesthetic. It serves not just as a scheduling tool, but as a shared space for moments, notes, and milestones.
+**Sage-Almanac** is a premium, minimalist shared calendar application designed specifically for couples. It moves away from the utilitarian feel of traditional calendar apps and introduces a warm, journal-like aesthetic. It serves not just as a scheduling tool, but as a shared space for moments, notes, and milestones.
 
-Built with modern web technologies, C-Aleena offers real-time synchronization, seamless authentication, and a beautifully fluid user interface.
+Built with modern web technologies, Sage-Almanac offers real-time synchronization, seamless authentication, and a beautifully fluid user interface.
 
 ## Features
 
@@ -29,7 +29,7 @@ Built with modern web technologies, C-Aleena offers real-time synchronization, s
 
 ## Tech Stack
 
-C-Aleena is built entirely on a modern, high-performance stack:
+Sage-Almanac is built entirely on a modern, high-performance stack:
 
 - **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
 - **UI Library:** [React 19](https://react.dev/)
@@ -50,8 +50,8 @@ Ensure you have [Node.js](https://nodejs.org/) installed along with your preferr
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/Rahul-Sahani04/c-aleena.git
-   cd c-aleena
+   git clone https://github.com/Rahul-Sahani04/Sage-Almanac.git
+   cd Sage-Almanac
    ```
 
 2. **Install dependencies**
@@ -105,7 +105,7 @@ All operations strictly enforce authentication via Clerk, and Convex resolvers e
 
 ## Contributing
 
-While C-Aleena is built as a personal project, suggestions and feedback are always welcome. Feel free to open an issue or submit a pull request if you notice any bugs or have ideas for improvement.
+While Sage-Almanac is built as a personal project, suggestions and feedback are always welcome. Feel free to open an issue or submit a pull request if you notice any bugs or have ideas for improvement.
 
 ## License
 

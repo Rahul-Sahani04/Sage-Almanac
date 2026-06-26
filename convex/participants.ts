@@ -3,7 +3,7 @@ import { mutation, query } from "./_generated/server";
 import { hashToken } from "./utils";
 import { resolveUser } from "./authUtils";
 
-const SERVER_SALT = process.env.SERVER_SALT ?? "c-aleena-default-salt";
+const SERVER_SALT = process.env.SERVER_SALT ?? "Sage-Almanac-default-salt";
 
 /**
  * Join a calendar using an invite token.

@@ -75,7 +75,7 @@ export default function HomePage() {
                         </div>
                         <div>
                             <h1 className="font-display italic text-2xl font-medium text-[var(--color-text-primary)] tracking-tight leading-none">
-                                C-Aleena
+                                Sage-Almanac
                             </h1>
                         </div>
                     </Link>
@@ -255,7 +255,7 @@ export default function HomePage() {
             <footer className="absolute bottom-0 w-full mt-10 border-t border-[var(--color-border)] bg-[var(--color-surface)] mt-auto">
                 <div className="max-w-5xl mx-auto px-4 sm:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <p className="text-sm text-[var(--color-text-muted)] font-display italic text-lg">
-                        C-Aleena.
+                        Sage-Almanac.
                     </p>
                     <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-widest">
                         Issue No. 1 — A Private Space
